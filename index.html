@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERP Software</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>ERP Software</h1>
+
+    <nav>
+        <ul>
+            <li><a href="index.html">Startseite</a></li>
+            <li><a href="scanner.html">Barcode-Scanner</a></li>
+            <li><a href="lagerbestand.html">Lagerbestand anzeigen</a></li>
+            <!-- Weitere Links zu anderen Seiten, falls gewünscht -->
+        </ul>
+    </nav>
+
+    <!-- Einbuchen-Sektion -->
+    <section id="einbuchen">
+        <h2>Einbuchen</h2>
+        <label for="produktname">Produktname:</label>
+        <input type="text" id="produktname" placeholder="Produktname">
+        
+        <label for="menge">Menge:</label>
+        <input type="number" id="menge" placeholder="Menge">
+        
+        <label for="mhd">MHD (YYYY-MM-DD):</label>
+        <input type="date" id="mhd">
+        
+        <label for="lagerort">Lagerort:</label>
+        <select id="lagerortEinbuchen">
+            <!-- Optionen werden durch JavaScript hinzugefügt -->
+        </select>
+        
+        <button onclick="einbuchen()">Einbuchen</button>
+    </section>
+
+    <!-- Ausbuchen-Sektion -->
+    <section id="ausbuchen">
+        <h2>Ausbuchen</h2>
+        <label for="ausbuchenProdukt">Produktname:</label>
+        <input type="text" id="ausbuchenProdukt" placeholder="Produktname">
+        
+        <label for="ausbuchenMenge">Menge:</label>
+        <input type="number" id="ausbuchenMenge" placeholder="Menge">
+        
+        <label for="ausbuchenLagerort">Lagerort:</label>
+        <select id="lagerortAusbuchen">
+            <!-- Optionen werden durch JavaScript hinzugefügt -->
+        </select>
+        
+        <button onclick="ausbuchen()">Ausbuchen</button>
+    </section>
+
+    <!-- Lagerbestand-Sektion -->
+    <section id="lagerbestand">
+        <h2>Lagerbestand</h2>
+        
+        <!-- Suchfeld hinzufügen -->
+        <label for="search">Suchen:</label>
+        <input type="text" id="search" placeholder="Produktname oder Lagerort" onkeyup="sucheLagerbestand()">
+        
+        <div class="button-container">
+            <button onclick="zeigeLagerbestand()">Lagerbestand anzeigen</button>
+            <button onclick="allePositionenLoeschen()">Alle Positionen löschen</button>
+        </div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Produkt</th>
+                    <th>Menge</th>
+                    <th>MHD</th>
+                    <th>Lagerort</th>
+                </tr>
+            </thead>
+            <tbody id="lagerbestandTabelle">
+                <!-- Dynamische Inhalte werden hier eingefügt -->
+            </tbody>
+        </table>
+    </section>
+    
+
+    <script src="script.js"></script>
+</body>
+</html>

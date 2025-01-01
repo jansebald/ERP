@@ -1,0 +1,137 @@
+/* Allgemeine Einstellungen */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* Hintergrund und Farbgestaltung */
+body {
+    background-color: #f4f4f9;
+    color: #333;
+    padding: 20px;
+}
+
+/* Überschrift */
+h1 {
+    text-align: center;
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+/* Container für das Layout */
+.container {
+    width: 80%;
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+}
+
+/* Abschnittsüberschriften */
+h2 {
+    color: #333;
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+/* Formularfelder */
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="date"],
+select {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0 20px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    box-sizing: border-box;
+}
+
+/* Buttons */
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    font-size: 1.1em;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+/* Abschnitte für Einbuchen, Ausbuchen und Lagerbestand */
+section {
+    margin-bottom: 30px;
+}
+
+/* Dropdowns (select-Elemente) */
+select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+}
+
+/* Hilfsklassen für Abstand */
+.mb-20 {
+    margin-bottom: 20px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+/* Container für die Buttons im Lagerbestand */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* Lagerbestand-Tabelle */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table th,
+table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+table th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Suchfeld */
+#search {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1em;
+    background-color: #f9f9f9;
+}

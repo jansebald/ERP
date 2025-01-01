@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barcode-Scanner</title>
+    <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #scanner-container {
+            width: 100%;
+            height: 400px;
+            border: 2px solid #ccc;
+            margin-top: 20px;
+        }
+        #barcode-result {
+            font-size: 24px;
+            color: green;
+        }
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 18px;
+            margin-top: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Barcode-Scanner</h1>
+    <p>Scanne den Barcode mit der Kamera deines Handys:</p>
+
+    <!-- Container für den Live-Stream der Kamera -->
+    <div id="scanner-container"></div>
+    <!-- Bereich für das gescannte Ergebnis -->
+    <div id="barcode-result">Gescannten Barcode anzeigen...</div>
+
+    <a href="index.html">Zurück zur Hauptseite</a>
+
+    <script>
+        // QuaggaJS initialisieren und den Barcode-Scanner starten
+        function startScanner() {
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scanner-container'),  // Zeigt den Live-Stream im Scanner-Container
+                    constraints: {
+                        facingMode: "environment"  // Aktiviert die hintere Kamera des Handys
+                    }
+                },
+                decoder: {
+                    readers: ["ean_reader", "ean_8_reader", "upc_reader"]  // Erlaubt das Scannen von EAN und UPC Barcodes
+                }
+            }, function(err) {
+                if (err) {
+                    console.log(err);
+                    return;
+                }
+                Quagga.start(); // Startet den Scanner
+            });
+
+            // Barcode-Erkennung, wenn ein Barcode gescannt wird
+            Quagga.onDetected(function(result) {
+                const barcode = result.codeResult.code;
+                document.getElementById("barcode-result").innerText = `Gescannt: ${barcode}`;
+            });
+        }
+
+        // Scanner starten
+        startScanner();
+    </script>
+
+</body>
+</html>
