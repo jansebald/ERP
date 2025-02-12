@@ -49,15 +49,7 @@ function ladeLagerorte() {
 
 // Eingabefelder leeren
 function clearInputs() {
-  const ids = [
-    "produktname",
-    "menge",
-    "mhd",
-    "ausbuchenProdukt",
-    "ausbuchenMenge",
-    "lagerortEinbuchen",
-    "lagerortAusbuchen"
-  ];
+  const ids = ["produktname", "menge", "mhd", "ausbuchenProdukt", "ausbuchenMenge", "lagerortEinbuchen", "lagerortAusbuchen"];
   ids.forEach(id => {
     const elem = document.getElementById(id);
     if (elem) {
@@ -68,34 +60,35 @@ function clearInputs() {
 
 // Lagerbestand anzeigen – jede Zeile ist klickbar und öffnet das Detail-Modal
 function zeigeLagerbestand() {
-    const tabelle = document.getElementById("lagerbestandTabelle");
-    if (!tabelle) return;
-    tabelle.innerHTML = "";
-  
-    if (lagerbestand.length === 0) {
-      tabelle.innerHTML = "<tr><td colspan='4'>Kein Lagerbestand vorhanden.</td></tr>";
-      return;
-    }
-  
-    lagerbestand.forEach((produkt, index) => {
-      const row = document.createElement("tr");
-      row.style.cursor = "pointer";
-      row.setAttribute("data-index", index);
-      row.innerHTML = `
-        <td>${produkt.produktname}</td>
-        <td>${produkt.menge}</td>
-        <td>${produkt.mhd}</td>
-        <td>${produkt.lagerort}</td>
-      `;
-      row.addEventListener("click", function() {
-        openProductModal(index);
-      });
-      row.addEventListener("touchend", function() {
-        openProductModal(index);
-      });
-      tabelle.appendChild(row);
-    });
+  const tabelle = document.getElementById("lagerbestandTabelle");
+  if (!tabelle) return;
+  tabelle.innerHTML = "";
+
+  if (lagerbestand.length === 0) {
+    tabelle.innerHTML = "<tr><td colspan='4'>Kein Lagerbestand vorhanden.</td></tr>";
+    return;
   }
+
+  lagerbestand.forEach((produkt, index) => {
+    const row = document.createElement("tr");
+    row.style.cursor = "pointer";
+    row.setAttribute("data-index", index);
+    row.innerHTML = `
+      <td>${produkt.produktname}</td>
+      <td>${produkt.menge}</td>
+      <td>${produkt.mhd}</td>
+      <td>${produkt.lagerort}</td>
+    `;
+    // Eventlistener für Klick und Touch hinzufügen:
+    row.addEventListener("click", function() {
+      openProductModal(index);
+    });
+    row.addEventListener("touchend", function() {
+      openProductModal(index);
+    });
+    tabelle.appendChild(row);
+  });
+}
 
 // Alle Positionen löschen
 function allePositionenLoeschen() {
@@ -141,43 +134,43 @@ function zeigeGefiltertenLagerbestand(filteredLagerbestand) {
 
 // Einbuchen eines Produkts inklusive Barcode-Generierung und Erfassung des Buchungszeitpunkts
 function einbuchen() {
-    const produktname = document.getElementById("produktname").value.trim();
-    const menge = parseInt(document.getElementById("menge").value);
-    const mhd = document.getElementById("mhd").value;
-    const lagerort = document.getElementById("lagerortEinbuchen").value;
-  
-    if (!produktname || !menge || !mhd || !lagerort) {
-      alert("Bitte alle Felder ausfüllen!");
-      return;
-    }
-    if (menge <= 0) {
-      alert("Die Menge muss größer als 0 sein.");
-      return;
-    }
-  
-    // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
-    const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-  
-    // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
-    const neuerEintrag = {
-      produktname,
-      menge,
-      mhd,
-      lagerort,
-      barcode: uniqueId,
-      eingebuchtAm: new Date().toLocaleString()
-    };
-  
-    lagerbestand.push(neuerEintrag);
-    localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-  
-    alert(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
-  
-    clearInputs();
-    zeigeLagerbestand();
-  
-    // NICHT: generateBarcodeLabel(uniqueId);
+  const produktname = document.getElementById("produktname").value.trim();
+  const menge = parseInt(document.getElementById("menge").value);
+  const mhd = document.getElementById("mhd").value;
+  const lagerort = document.getElementById("lagerortEinbuchen").value;
+
+  if (!produktname || !menge || !mhd || !lagerort) {
+    alert("Bitte alle Felder ausfüllen!");
+    return;
   }
+  if (menge <= 0) {
+    alert("Die Menge muss größer als 0 sein.");
+    return;
+  }
+
+  // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
+  const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+
+  // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
+  const neuerEintrag = {
+    produktname,
+    menge,
+    mhd,
+    lagerort,
+    barcode: uniqueId,
+    eingebuchtAm: new Date().toLocaleString()
+  };
+
+  lagerbestand.push(neuerEintrag);
+  localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
+
+  alert(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
+
+  clearInputs();
+  zeigeLagerbestand();
+
+  // Hier wird kein Barcode auf der Hauptseite angezeigt!
+}
 
 // Ausbuchen über das klassische Formular
 function ausbuchen() {
@@ -189,13 +182,11 @@ function ausbuchen() {
     alert("Bitte alle Felder ausfüllen!");
     return;
   }
-
   if (menge <= 0) {
     alert("Die Menge muss größer als 0 sein.");
     return;
   }
 
-  // Suchen anhand von Name (case-insensitive) und Lagerort
   const index = lagerbestand.findIndex(p =>
     p.produktname.toLowerCase() === produktname.toLowerCase() && p.lagerort === lagerort
   );
@@ -220,205 +211,46 @@ function ausbuchen() {
   zeigeLagerbestand();
 }
 
-/* --------------- Funktionen für Barcode-Etikett (Einbuchen) --------------- */
+/* --------------- Funktionen für das Produkt-Detail Modal --------------- */
 
-// Erzeugt das Barcode-Etikett und zeigt den Etikett-Container an
-function generateBarcodeLabel(barcodeValue) {
-  document.getElementById("barcodeValue").innerText = barcodeValue;
-  JsBarcode("#barcodeSvg", barcodeValue, {
+// Öffnet das Modal und füllt es mit den Details des angeklickten Produkts (inklusive Barcode)
+function openProductModal(index) {
+  const produkt = lagerbestand[index];
+  const modal = document.getElementById("productModal");
+  const content = document.getElementById("productDetailContent");
+
+  content.innerHTML = `
+    <p><strong>Produkt:</strong> ${produkt.produktname}</p>
+    <p><strong>Menge:</strong> ${produkt.menge}</p>
+    <p><strong>MHD:</strong> ${produkt.mhd}</p>
+    <p><strong>Lagerort:</strong> ${produkt.lagerort}</p>
+    <p><strong>Eingebucht am:</strong> ${produkt.eingebuchtAm || '-'}</p>
+    <div id="modalBarcodeContainer" style="margin-top:10px;">
+      <svg id="modalBarcodeSvg"></svg>
+      <p id="modalBarcodeValue">${produkt.barcode}</p>
+    </div>
+  `;
+
+  // Passe die Barcode-Strichdicke dynamisch an
+  let barcodeWidth;
+  if (window.innerWidth < 400) {
+    barcodeWidth = 0.8;
+  } else if (window.innerWidth < 600) {
+    barcodeWidth = 1;
+  } else {
+    barcodeWidth = 2;
+  }
+
+  // Barcode im Modal generieren
+  JsBarcode("#modalBarcodeSvg", produkt.barcode, {
     format: "CODE128",
-    width: 2,
+    width: barcodeWidth,
     height: 50,
     displayValue: false
   });
-  document.getElementById("etikettContainer").style.display = "block";
+
+  modal.style.display = "block";
 }
-
-function closeEtikett() {
-  document.getElementById("etikettContainer").style.display = "none";
-}
-
-/* --------------- Funktionen für den Barcode-Scanner (Modal) --------------- */
-
-// Wird aufgerufen, wenn ein Barcode gescannt wurde
-function handleScannedBarcode(scannedCode) {
-    const item = lagerbestand.find(p =>
-        p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
-      );
-  if (!item) {
-    alert("Ware nicht gefunden!");
-    return;
-  }
-  currentScannedItem = item;
-
-  const modalInfo = document.getElementById("modalInfo");
-  modalInfo.innerHTML = `<p><strong>Produkt:</strong> ${item.produktname}</p>
-                         <p><strong>Menge:</strong> ${item.menge}</p>
-                         <p><strong>MHD:</strong> ${item.mhd}</p>
-                         <p><strong>Lagerort:</strong> ${item.lagerort}</p>
-                         <p><strong>Barcode:</strong> ${item.barcode}</p>`;
-  document.getElementById("umlagerungSection").style.display = "none";
-  document.getElementById("modalActions").style.display = "block";
-  document.getElementById("scannedModal").style.display = "block";
-}
-
-function closeModal() {
-  document.getElementById("scannedModal").style.display = "none";
-  currentScannedItem = null;
-}
-
-function ausbuchenScannedItem() {
-  if (!currentScannedItem) return;
-  lagerbestand = lagerbestand.filter(p => p.barcode !== currentScannedItem.barcode);
-  localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-  alert(`Die Ware ${currentScannedItem.produktname} wurde ausgebucht.`);
-  closeModal();
-  zeigeLagerbestand();
-}
-
-function showUmlagerungOptions() {
-  if (!currentScannedItem) return;
-  document.getElementById("modalActions").style.display = "none";
-  const newLagerortSelect = document.getElementById("newLagerort");
-  newLagerortSelect.innerHTML = "";
-  const defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.textContent = "Bitte wählen...";
-  newLagerortSelect.appendChild(defaultOption);
-
-  lagerorte.forEach(lagerort => {
-    if (lagerort !== currentScannedItem.lagerort) {
-      const option = document.createElement("option");
-      option.value = lagerort;
-      option.textContent = lagerort;
-      newLagerortSelect.appendChild(option);
-    }
-  });
-  document.getElementById("umlagerungSection").style.display = "block";
-}
-
-function umlagernScannedItem() {
-  const newLagerort = document.getElementById("newLagerort").value;
-  if (!newLagerort) {
-    alert("Bitte einen neuen Lagerort auswählen.");
-    return;
-  }
-  currentScannedItem.lagerort = newLagerort;
-  localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-  alert(`Die Ware ${currentScannedItem.produktname} wurde nach ${newLagerort} umlagert.`);
-  closeModal();
-  zeigeLagerbestand();
-}
-
-function cancelUmlagerung() {
-  document.getElementById("umlagerungSection").style.display = "none";
-  document.getElementById("modalActions").style.display = "block";
-}
-
-/* --------------- Funktionen für das Produkt-Detail Modal --------------- */
-
-// Öffnet das Modal und füllt es mit den Details des angeklickten Produkts
-function openProductModal(index) {
-    const produkt = lagerbestand[index];
-    const modal = document.getElementById("productModal");
-    const content = document.getElementById("productDetailContent");
-  
-    // Fülle das Modal mit den Basisinformationen inklusive Barcode
-    content.innerHTML = `
-      <p><strong>Produkt:</strong> ${produkt.produktname}</p>
-      <p><strong>Menge:</strong> ${produkt.menge}</p>
-      <p><strong>MHD:</strong> ${produkt.mhd}</p>
-      <p><strong>Lagerort:</strong> ${produkt.lagerort}</p>
-      <p><strong>Eingebucht am:</strong> ${produkt.eingebuchtAm || '-'}</p>
-      <div id="modalBarcodeContainer" style="margin-top:10px;">
-        <svg id="modalBarcodeSvg"></svg>
-        <p id="modalBarcodeValue">${produkt.barcode}</p>
-      </div>
-    `;
-  
-    // Dynamische Anpassung der Barcode-Strichdicke abhängig von der Fensterbreite
-    let barcodeWidth;
-    if (window.innerWidth < 400) {
-      barcodeWidth = 0.8;
-    } else if (window.innerWidth < 600) {
-      barcodeWidth = 1;
-    } else {
-      barcodeWidth = 2;
-    }
-  
-    // Generiere den Barcode im Modal
-    JsBarcode("#modalBarcodeSvg", produkt.barcode, {
-      format: "CODE128",
-      width: barcodeWidth,
-      height: 50,
-      displayValue: false
-    });
-  
-    modal.style.display = "block";
-  }
-
-  Quagga.onDetected(function(result) {
-    let scannedCode = result.codeResult.code;
-    scannedCode = scannedCode.trim();  // eventuell überflüssige Leerzeichen entfernen
-    console.log("Gescannt:", scannedCode);
-    document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
-    // Debug: Alle vorhandenen Barcodes anzeigen
-    console.log("Lagerbestand Barcodes:", lagerbestand.map(p => p.barcode));
-    
-    // Falls noch kein Modal offen ist:
-    if (document.getElementById("scannedModal").style.display === "none") {
-      handleScannedBarcode(scannedCode);
-    }
-  });
-
-  function handleScannedBarcode(scannedCode) {
-    scannedCode = scannedCode.trim();
-    const item = lagerbestand.find(p =>
-        p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
-      );
-    if (!item) {
-      alert("Ware nicht gefunden!");
-      return;
-    }
-    currentScannedItem = item;
-    // Hier kannst du dann den Barcode-Modal öffnen etc.
-    openProductModal(lagerbestand.indexOf(item));
-  }
-
-function toggleBarcodeDisplay(barcodeValue) {
-    const container = document.getElementById("modalBarcodeContainer");
-    if (container.style.display === "none") {
-      container.style.display = "block";
-      // Barcode generieren (falls noch nicht generiert)
-      JsBarcode("#modalBarcodeSvg", barcodeValue, {
-        format: "CODE128",
-        width: 2,
-        height: 50,
-        displayValue: false
-      });
-    } else {
-      container.style.display = "none";
-    }
-  }
-
-  // Beispiel: Statt direkt im HTML:
-// <tr onclick="openProductModal(${index})" style="cursor: pointer;"> ... </tr>
-// ... kannst du das dynamisch mit JavaScript machen:
-function addRowEventListeners() {
-    const rows = document.querySelectorAll("#lagerbestandTabelle tr");
-    rows.forEach(row => {
-      row.addEventListener("click", function() {
-        // Hier kannst du z.B. einen Datensatzindex aus einem data-Attribut auslesen
-        const index = this.getAttribute("data-index");
-        openProductModal(index);
-      });
-      // Zusätzlich für Touch:
-      row.addEventListener("touchend", function() {
-        const index = this.getAttribute("data-index");
-        openProductModal(index);
-      });
-    });
-  }
 
 // Schließt das Produkt-Detail Modal
 function closeProductModal() {
@@ -438,7 +270,62 @@ function printBarcode() {
   printWindow.close();
 }
 
-// Beim Laden der Seite: Dropdowns laden und Lagerbestand anzeigen
+/* --------------- Funktionen für den Barcode-Scanner (Modal) --------------- */
+
+// Diese Funktion wird nur einmal definiert und bereinigt den gescannten Code
+function handleScannedBarcode(scannedCode) {
+  scannedCode = scannedCode.trim().replace(/[\n\r]+/g, "");
+  console.log("Gescannt:", scannedCode);
+  console.log("Gespeicherte Barcodes:", lagerbestand.map(p => p.barcode).join(", "));
+  const item = lagerbestand.find(p =>
+    p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
+  );
+  if (!item) {
+    alert("Ware nicht gefunden! (Scanned: " + scannedCode + ")");
+    return;
+  }
+  currentScannedItem = item;
+  openProductModal(lagerbestand.indexOf(item));
+}
+
+/* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
+
+if (typeof Quagga !== "undefined") {
+  Quagga.init({
+    inputStream: {
+      name: "Live",
+      type: "LiveStream",
+      target: document.querySelector("#scanner-container"),
+      constraints: {
+        facingMode: "environment"
+      }
+    },
+    decoder: {
+      readers: ["code_128_reader"],
+      multiple: false
+    },
+    locate: true
+  }, function(err) {
+    if (err) {
+      console.error(err);
+      return;
+    }
+    Quagga.start();
+  });
+
+  Quagga.onDetected(function(result) {
+    let scannedCode = result.codeResult.code;
+    scannedCode = scannedCode.trim();
+    console.log("Gescannt:", scannedCode);
+    document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
+    // Falls noch kein gesondertes Modal (z. B. für Scans) offen ist:
+    if (document.getElementById("scannedModal").style.display === "none") {
+      handleScannedBarcode(scannedCode);
+    }
+  });
+}
+
+/* --------------- Initialisierung beim Laden der Seite --------------- */
 window.onload = function() {
   ladeLagerorte();
   zeigeLagerbestand();
