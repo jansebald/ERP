@@ -256,16 +256,67 @@ function closeProductModal() {
   
 // Öffnet ein neues Fenster mit dem Barcode, um diesen zu drucken
 function printBarcode() {
-  const barcodeContainer = document.getElementById("modalBarcodeContainer").innerHTML;
-  const printWindow = window.open('', '', 'width=400,height=400');
-  printWindow.document.write('<html><head><title>Barcode Drucken</title></head><body>');
-  printWindow.document.write(barcodeContainer);
-  printWindow.document.write('</body></html>');
-  printWindow.document.close();
-  printWindow.focus();
-  printWindow.print();
-  printWindow.close();
-}
+    // Hole den Barcode-Wert (angenommen, er steht im Element "modalBarcodeValue")
+    const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
+    if (!barcodeValue) {
+      alert("Kein Barcode verfügbar!");
+      return;
+    }
+    
+    // Öffne ein neues Fenster mit ausreichenden Dimensionen
+    const printWindow = window.open('', '_blank', 'width=800,height=600');
+    
+    // Schreibe die HTML-Struktur für das Druckfenster, inklusive Einbindung von JsBarcode
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html lang="de">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Barcode Drucken</title>
+        <style>
+          body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #fff;
+          }
+          #barcode {
+            width: 100%;
+            max-width: 600px; /* Maximale Breite, kann angepasst werden */
+          }
+        </style>
+        <!-- JsBarcode einbinden -->
+        <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+      </head>
+      <body>
+        <svg id="barcode"></svg>
+        <script>
+          // Generiere den Barcode in größerer Darstellung
+          JsBarcode("#barcode", "${barcodeValue}", {
+            format: "CODE128",
+            width: 4,        // Erhöhte Balkenbreite für bessere Druckqualität
+            height: 100,     // Erhöhte Höhe
+            displayValue: true
+          });
+        <\/script>
+      </body>
+      </html>
+    `);
+    
+    // Schließe das Dokument, damit der Inhalt gerendert wird
+    printWindow.document.close();
+    
+    // Füge eine kurze Verzögerung hinzu, damit der Barcode vollständig gerendert wird
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 500);
+  }
   
 /* --------------- Funktionen für den Barcode-Scanner (Modal) --------------- */
   
@@ -288,41 +339,58 @@ function handleScannedBarcode(scannedCode) {
 /* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
   
 if (typeof Quagga !== "undefined") {
-  Quagga.init({
-    inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: document.querySelector("#scanner-container"),
-      constraints: {
-        facingMode: "environment"
-      }
-    },
-    decoder: {
-      readers: ["code_128_reader"],
-      multiple: false
-    },
-    locate: true
-  }, function(err) {
-    if (err) {
-      console.error("Quagga init error:", err);
-      alert("Fehler beim Initialisieren des Scanners: " + err);
-      return;
-    }
-    console.log("Quagga wurde erfolgreich initialisiert.");
-    Quagga.start();
-  });
+    // Wir packen die Initialisierung in window.onload, um sicherzustellen, dass alle DOM-Elemente geladen sind
+    window.onload = function() {
+      // Lade zuerst die Dropdowns und den lokalen Lagerbestand
+      ladeLagerorte();
+      zeigeLagerbestand();
   
-  Quagga.onDetected(function(result) {
-    console.log("Quagga onDetected result:", result);
-    let scannedCode = result.codeResult.code;
-    scannedCode = scannedCode.trim();
-    console.log("Gescannt:", scannedCode);
-    document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
-    if (document.getElementById("scannedModal").style.display === "none") {
-      handleScannedBarcode(scannedCode);
-    }
-  });
-}
+      // Quagga initialisieren
+      Quagga.init({
+        inputStream: {
+          name: "Live",
+          type: "LiveStream",
+          target: document.querySelector("#scanner-container"), // Muss existieren und sichtbar sein
+          constraints: {
+            // Falls "environment" nicht funktioniert, kannst du testweise auch "user" versuchen
+            facingMode: "environment"
+          }
+        },
+        decoder: {
+          // Wir verwenden den Code128-Reader, da dein Barcode so generiert wird
+          readers: ["code_128_reader"],
+          multiple: false
+        },
+        locate: true // Versucht, den Barcode im Bild zu lokalisieren
+      }, function(err) {
+        if (err) {
+          console.error("Quagga init error:", err);
+          alert("Fehler beim Initialisieren des Scanners: " + err);
+          return;
+        }
+        console.log("Quagga wurde erfolgreich initialisiert.");
+        Quagga.start();
+      });
+  
+      // Registrierung des Detektions-Callbacks
+      Quagga.onDetected(function(result) {
+        console.log("Quagga onDetected result:", result);
+        if (result && result.codeResult && result.codeResult.code) {
+          let scannedCode = result.codeResult.code.trim();
+          console.log("Gescannt:", scannedCode);
+          // Setze das Ergebnis in ein Display-Element (falls vorhanden)
+          const resultElem = document.getElementById("barcode-result");
+          if (resultElem) {
+            resultElem.innerText = `Gescannt: ${scannedCode}`;
+          }
+          // Zur Debug-Zwecken rufen wir handleScannedBarcode direkt auf
+          handleScannedBarcode(scannedCode);
+        } else {
+          console.log("Kein gültiger Barcode erkannt.");
+        }
+      });
+    };
+  }
   
 /* --------------- Initialisierung beim Laden der Seite --------------- */
 window.onload = function() {
