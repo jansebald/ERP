@@ -68,25 +68,34 @@ function clearInputs() {
 
 // Lagerbestand anzeigen – jede Zeile ist klickbar und öffnet das Detail-Modal
 function zeigeLagerbestand() {
-  const tabelle = document.getElementById("lagerbestandTabelle");
-  if (!tabelle) return;
-  tabelle.innerHTML = "";
-
-  if (lagerbestand.length === 0) {
-    tabelle.innerHTML = "<tr><td colspan='4'>Kein Lagerbestand vorhanden.</td></tr>";
-    return;
+    const tabelle = document.getElementById("lagerbestandTabelle");
+    if (!tabelle) return;
+    tabelle.innerHTML = "";
+  
+    if (lagerbestand.length === 0) {
+      tabelle.innerHTML = "<tr><td colspan='4'>Kein Lagerbestand vorhanden.</td></tr>";
+      return;
+    }
+  
+    lagerbestand.forEach((produkt, index) => {
+      const row = document.createElement("tr");
+      row.style.cursor = "pointer";
+      row.setAttribute("data-index", index);
+      row.innerHTML = `
+        <td>${produkt.produktname}</td>
+        <td>${produkt.menge}</td>
+        <td>${produkt.mhd}</td>
+        <td>${produkt.lagerort}</td>
+      `;
+      row.addEventListener("click", function() {
+        openProductModal(index);
+      });
+      row.addEventListener("touchend", function() {
+        openProductModal(index);
+      });
+      tabelle.appendChild(row);
+    });
   }
-
-  lagerbestand.forEach((produkt, index) => {
-    const row = `<tr onclick="openProductModal(${index})" style="cursor: pointer;">
-      <td>${produkt.produktname}</td>
-      <td>${produkt.menge}</td>
-      <td>${produkt.mhd}</td>
-      <td>${produkt.lagerort}</td>
-    </tr>`;
-    tabelle.innerHTML += row;
-  });
-}
 
 // Alle Positionen löschen
 function allePositionenLoeschen() {
