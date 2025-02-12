@@ -242,7 +242,9 @@ function closeEtikett() {
 
 // Wird aufgerufen, wenn ein Barcode gescannt wurde
 function handleScannedBarcode(scannedCode) {
-  const item = lagerbestand.find(p => p.barcode === scannedCode);
+    const item = lagerbestand.find(p =>
+        p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
+      );
   if (!item) {
     alert("Ware nicht gefunden!");
     return;
@@ -353,6 +355,34 @@ function openProductModal(index) {
     });
   
     modal.style.display = "block";
+  }
+
+  Quagga.onDetected(function(result) {
+    let scannedCode = result.codeResult.code;
+    scannedCode = scannedCode.trim();  // eventuell überflüssige Leerzeichen entfernen
+    console.log("Gescannt:", scannedCode);
+    document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
+    // Debug: Alle vorhandenen Barcodes anzeigen
+    console.log("Lagerbestand Barcodes:", lagerbestand.map(p => p.barcode));
+    
+    // Falls noch kein Modal offen ist:
+    if (document.getElementById("scannedModal").style.display === "none") {
+      handleScannedBarcode(scannedCode);
+    }
+  });
+
+  function handleScannedBarcode(scannedCode) {
+    scannedCode = scannedCode.trim();
+    const item = lagerbestand.find(p =>
+        p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
+      );
+    if (!item) {
+      alert("Ware nicht gefunden!");
+      return;
+    }
+    currentScannedItem = item;
+    // Hier kannst du dann den Barcode-Modal öffnen etc.
+    openProductModal(lagerbestand.indexOf(item));
   }
 
 function toggleBarcodeDisplay(barcodeValue) {
