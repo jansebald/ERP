@@ -324,19 +324,23 @@ function printBarcode() {
   
 // Diese Funktion wird nur einmal definiert und bereinigt den gescannten Code
 function handleScannedBarcode(scannedCode) {
-  scannedCode = scannedCode.trim().replace(/[\n\r]+/g, "");
-  console.log("Gescannt:", scannedCode);
-  console.log("Gespeicherte Barcodes:", lagerbestand.map(p => p.barcode).join(", "));
-  const item = lagerbestand.find(p =>
-    p.barcode.trim().toUpperCase() === scannedCode.toUpperCase()
-  );
-  if (!item) {
-    alert("Ware nicht gefunden! (Scanned: " + scannedCode + ")");
-    return;
+    scannedCode = scannedCode.trim().replace(/[\n\r]+/g, "");
+    console.log("Original gescannt:", scannedCode);
+    // In Großbuchstaben umwandeln und bereinigen:
+    scannedCode = cleanScannedCode(scannedCode.toUpperCase());
+    console.log("Bereinigt gescannt:", scannedCode);
+    
+    console.log("Gespeicherte Barcodes:", lagerbestand.map(p => p.barcode).join(", "));
+    const item = lagerbestand.find(p =>
+      p.barcode.trim().toUpperCase() === scannedCode
+    );
+    if (!item) {
+      alert("Ware nicht gefunden! (Scanned: " + scannedCode + ")");
+      return;
+    }
+    currentScannedItem = item;
+    openProductModal(lagerbestand.indexOf(item));
   }
-  currentScannedItem = item;
-  openProductModal(lagerbestand.indexOf(item));
-}
   
 /* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
   
@@ -352,18 +356,21 @@ if (typeof Quagga !== "undefined") {
         inputStream: {
           name: "Live",
           type: "LiveStream",
-          target: document.querySelector("#scanner-container"), // Muss existieren und sichtbar sein
+          target: document.querySelector("#scanner-container"),
           constraints: {
-            // Falls "environment" nicht funktioniert, kannst du testweise auch "user" versuchen
-            facingMode: "environment"
+            facingMode: "environment",
+            // Falls möglich, kannst du auch hier eine minimale Auflösung definieren:
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
           }
         },
         decoder: {
-          // Wir verwenden den Code128-Reader, da dein Barcode so generiert wird
           readers: ["code_128_reader"],
-          multiple: false
+          multiple: false,
+          // Du könntest auch experimentell den "patchSize" Parameter ändern:
+          // patchSize: "medium" // Alternativen: "small", "large"
         },
-        locate: true // Versucht, den Barcode im Bild zu lokalisieren
+        locate: true
       }, function(err) {
         if (err) {
           console.error("Quagga init error:", err);
@@ -373,6 +380,11 @@ if (typeof Quagga !== "undefined") {
         console.log("Quagga wurde erfolgreich initialisiert.");
         Quagga.start();
       });
+
+      function cleanScannedCode(code) {
+        // Erlaubte Zeichen: A-Z, 0-9 und Bindestrich
+        return code.replace(/[^A-Z0-9-]/g, "");
+      }
   
       // Registrierung des Detektions-Callbacks
       Quagga.onDetected(function(result) {
