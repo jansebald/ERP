@@ -6,7 +6,7 @@ const lagerorte = ["Wareneingang", "Chargierung", "Mischerei", "Füllerei", "Ver
 // Globaler Lagerbestand – wird aus dem localStorage geladen oder als leeres Array initialisiert
 let lagerbestand = JSON.parse(localStorage.getItem("lagerbestand")) || [];
 
-// Global für den aktuell gescannten Artikel
+// Global für den aktuell gescannten Artikel (wird z. B. im Barcode-Scanner genutzt)
 let currentScannedItem = null;
 
 /* --------------- Funktionen für Dropdowns und Lagerbestand --------------- */
@@ -66,7 +66,7 @@ function clearInputs() {
   });
 }
 
-// Lagerbestand anzeigen
+// Lagerbestand anzeigen – jede Zeile ist klickbar und öffnet das Detail-Modal
 function zeigeLagerbestand() {
   const tabelle = document.getElementById("lagerbestandTabelle");
   if (!tabelle) return;
@@ -77,8 +77,8 @@ function zeigeLagerbestand() {
     return;
   }
 
-  lagerbestand.forEach(produkt => {
-    const row = `<tr>
+  lagerbestand.forEach((produkt, index) => {
+    const row = `<tr onclick="openProductModal(${index})" style="cursor: pointer;">
       <td>${produkt.produktname}</td>
       <td>${produkt.menge}</td>
       <td>${produkt.mhd}</td>
@@ -117,8 +117,8 @@ function zeigeGefiltertenLagerbestand(filteredLagerbestand) {
     return;
   }
 
-  filteredLagerbestand.forEach(produkt => {
-    const row = `<tr>
+  filteredLagerbestand.forEach((produkt, index) => {
+    const row = `<tr onclick="openProductModal(${index})" style="cursor: pointer;">
       <td>${produkt.produktname}</td>
       <td>${produkt.menge}</td>
       <td>${produkt.mhd}</td>
@@ -130,7 +130,7 @@ function zeigeGefiltertenLagerbestand(filteredLagerbestand) {
 
 /* --------------- Funktionen für Ein- und Ausbuchen --------------- */
 
-// Einbuchen eines Produkts inklusive Barcode-Generierung
+// Einbuchen eines Produkts inklusive Barcode-Generierung und Erfassung des Buchungszeitpunkts
 function einbuchen() {
   const produktname = document.getElementById("produktname").value.trim();
   const menge = parseInt(document.getElementById("menge").value);
@@ -150,8 +150,16 @@ function einbuchen() {
   // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
   const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
 
-  // Erstelle einen neuen Eintrag – jeder Einbuchen-Vorgang ist hier ein eigener Datensatz
-  const neuerEintrag = { produktname, menge, mhd, lagerort, barcode: uniqueId };
+  // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
+  const neuerEintrag = {
+    produktname,
+    menge,
+    mhd,
+    lagerort,
+    barcode: uniqueId,
+    eingebuchtAm: new Date().toLocaleString()
+  };
+
   lagerbestand.push(neuerEintrag);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
 
@@ -207,16 +215,13 @@ function ausbuchen() {
 
 // Erzeugt das Barcode-Etikett und zeigt den Etikett-Container an
 function generateBarcodeLabel(barcodeValue) {
-  // Setze den Barcode-Wert als Text
   document.getElementById("barcodeValue").innerText = barcodeValue;
-  // Erzeuge den Barcode im SVG-Element mit JsBarcode
   JsBarcode("#barcodeSvg", barcodeValue, {
     format: "CODE128",
     width: 2,
     height: 50,
     displayValue: false
   });
-  // Blende den Etikett-Container ein
   document.getElementById("etikettContainer").style.display = "block";
 }
 
@@ -228,7 +233,6 @@ function closeEtikett() {
 
 // Wird aufgerufen, wenn ein Barcode gescannt wurde
 function handleScannedBarcode(scannedCode) {
-  // Suche den Datensatz anhand des Barcodes
   const item = lagerbestand.find(p => p.barcode === scannedCode);
   if (!item) {
     alert("Ware nicht gefunden!");
@@ -236,30 +240,24 @@ function handleScannedBarcode(scannedCode) {
   }
   currentScannedItem = item;
 
-  // Fülle das Modal mit den Informationen
   const modalInfo = document.getElementById("modalInfo");
   modalInfo.innerHTML = `<p><strong>Produkt:</strong> ${item.produktname}</p>
                          <p><strong>Menge:</strong> ${item.menge}</p>
                          <p><strong>MHD:</strong> ${item.mhd}</p>
                          <p><strong>Lagerort:</strong> ${item.lagerort}</p>
                          <p><strong>Barcode:</strong> ${item.barcode}</p>`;
-  // Stelle sicher, dass der Umlagerungsabschnitt versteckt ist und die Standardaktionen angezeigt werden
   document.getElementById("umlagerungSection").style.display = "none";
   document.getElementById("modalActions").style.display = "block";
-  // Zeige das Modal
   document.getElementById("scannedModal").style.display = "block";
 }
 
-// Schließt das Modal
 function closeModal() {
   document.getElementById("scannedModal").style.display = "none";
   currentScannedItem = null;
 }
 
-// Ausbuchen der gescannten Ware (vollständiges Entfernen)
 function ausbuchenScannedItem() {
   if (!currentScannedItem) return;
-  // Entferne den Artikel aus dem Lagerbestand
   lagerbestand = lagerbestand.filter(p => p.barcode !== currentScannedItem.barcode);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
   alert(`Die Ware ${currentScannedItem.produktname} wurde ausgebucht.`);
@@ -267,12 +265,9 @@ function ausbuchenScannedItem() {
   zeigeLagerbestand();
 }
 
-// Bereitet den Umlagerungsprozess vor, indem ein Dropdown mit möglichen Ziel-Lagerorten (außer dem aktuellen) angezeigt wird
 function showUmlagerungOptions() {
   if (!currentScannedItem) return;
-  // Verstecke die Standardaktionen
   document.getElementById("modalActions").style.display = "none";
-  // Fülle das Dropdown mit Lagerorten, ausgenommen den aktuellen Lagerort
   const newLagerortSelect = document.getElementById("newLagerort");
   newLagerortSelect.innerHTML = "";
   const defaultOption = document.createElement("option");
@@ -288,11 +283,9 @@ function showUmlagerungOptions() {
       newLagerortSelect.appendChild(option);
     }
   });
-  // Blende den Umlagerungsabschnitt ein
   document.getElementById("umlagerungSection").style.display = "block";
 }
 
-// Umlagern der gescannten Ware in den neuen Lagerort
 function umlagernScannedItem() {
   const newLagerort = document.getElementById("newLagerort").value;
   if (!newLagerort) {
@@ -306,10 +299,75 @@ function umlagernScannedItem() {
   zeigeLagerbestand();
 }
 
-// Abbrechen der Umlagerung: Blende den Umlagerungsabschnitt wieder aus und zeige die Standardaktionen
 function cancelUmlagerung() {
   document.getElementById("umlagerungSection").style.display = "none";
   document.getElementById("modalActions").style.display = "block";
+}
+
+/* --------------- Funktionen für das Produkt-Detail Modal --------------- */
+
+// Öffnet das Modal und füllt es mit den Details des angeklickten Produkts
+function openProductModal(index) {
+    const produkt = lagerbestand[index];
+    const modal = document.getElementById("productModal");
+    const content = document.getElementById("productDetailContent");
+  
+    // Fülle das Modal mit den Produktdetails inklusive Barcode
+    content.innerHTML = `
+      <p><strong>Produkt:</strong> ${produkt.produktname}</p>
+      <p><strong>Menge:</strong> ${produkt.menge}</p>
+      <p><strong>MHD:</strong> ${produkt.mhd}</p>
+      <p><strong>Lagerort:</strong> ${produkt.lagerort}</p>
+      <p><strong>Eingebucht am:</strong> ${produkt.eingebuchtAm || '-'}</p>
+      <div id="modalBarcodeContainer" style="margin-top:10px;">
+        <svg id="modalBarcodeSvg"></svg>
+        <p id="modalBarcodeValue">${produkt.barcode}</p>
+      </div>
+    `;
+  
+    // Generiere den Barcode sofort im Modal
+    JsBarcode("#modalBarcodeSvg", produkt.barcode, {
+      format: "CODE128",
+      width: 2,
+      height: 50,
+      displayValue: false
+    });
+  
+    modal.style.display = "block";
+  }
+
+function toggleBarcodeDisplay(barcodeValue) {
+    const container = document.getElementById("modalBarcodeContainer");
+    if (container.style.display === "none") {
+      container.style.display = "block";
+      // Barcode generieren (falls noch nicht generiert)
+      JsBarcode("#modalBarcodeSvg", barcodeValue, {
+        format: "CODE128",
+        width: 2,
+        height: 50,
+        displayValue: false
+      });
+    } else {
+      container.style.display = "none";
+    }
+  }
+
+// Schließt das Produkt-Detail Modal
+function closeProductModal() {
+  document.getElementById("productModal").style.display = "none";
+}
+
+// Öffnet ein neues Fenster mit dem Barcode, um diesen zu drucken
+function printBarcode() {
+  const barcodeContainer = document.getElementById("modalBarcodeContainer").innerHTML;
+  const printWindow = window.open('', '', 'width=400,height=400');
+  printWindow.document.write('<html><head><title>Barcode Drucken</title></head><body>');
+  printWindow.document.write(barcodeContainer);
+  printWindow.document.write('</body></html>');
+  printWindow.document.close();
+  printWindow.focus();
+  printWindow.print();
+  printWindow.close();
 }
 
 // Beim Laden der Seite: Dropdowns laden und Lagerbestand anzeigen

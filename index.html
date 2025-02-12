@@ -85,14 +85,25 @@
       </table>
     </section>
 
-    <!-- Etikett-Container (wird nach Einbuchung eingeblendet) -->
+    <!-- Barcode-Etikett-Container (wird nach erfolgreichem Einbuchen angezeigt) -->
     <div id="etikettContainer" class="etikett-container" style="display:none;">
       <h2>Barcode Etikett</h2>
-      <!-- Das Barcode wird in diesem SVG-Element erzeugt -->
       <svg id="barcodeSvg"></svg>
       <p id="barcodeValue"></p>
       <button onclick="closeEtikett()">Schließen</button>
     </div>
+
+<!-- Produkt-Detail Modal -->
+<div id="productModal" class="modal" style="display: none;">
+    <div class="modal-content">
+      <span class="close" onclick="closeProductModal()">&times;</span>
+      <h2>Produkt Details</h2>
+      <div id="productDetailContent">
+        <!-- Hier werden die Produktinformationen dynamisch eingefügt -->
+      </div>
+      <button onclick="printBarcode()">Barcode Drucken</button>
+    </div>
+  </div>
   </div>
 
   <script src="script.js"></script>
