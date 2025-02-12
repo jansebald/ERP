@@ -292,39 +292,42 @@ function handleScannedBarcode(scannedCode) {
 /* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
 
 if (typeof Quagga !== "undefined") {
-  Quagga.init({
-    inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: document.querySelector("#scanner-container"),
-      constraints: {
-        facingMode: "environment"
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector("#scanner-container"),
+        constraints: {
+          facingMode: "environment"
+        }
+      },
+      decoder: {
+        readers: ["code_128_reader", "code_39_reader"],
+        multiple: false
+      },
+      locate: true  // Versucht, den Barcode besser zu lokalisieren
+    }, function(err) {
+      if (err) {
+        console.error("Quagga init error:", err);
+        alert("Fehler beim Initialisieren des Scanners: " + err);
+        return;
       }
-    },
-    decoder: {
-      readers: ["code_128_reader"],
-      multiple: false
-    },
-    locate: true
-  }, function(err) {
-    if (err) {
-      console.error(err);
-      return;
-    }
-    Quagga.start();
-  });
-
-  Quagga.onDetected(function(result) {
-    let scannedCode = result.codeResult.code;
-    scannedCode = scannedCode.trim();
-    console.log("Gescannt:", scannedCode);
-    document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
-    // Falls noch kein gesondertes Modal (z. B. für Scans) offen ist:
-    if (document.getElementById("scannedModal").style.display === "none") {
-      handleScannedBarcode(scannedCode);
-    }
-  });
-}
+      console.log("Quagga wurde erfolgreich initialisiert.");
+      Quagga.start();
+    });
+  
+    Quagga.onDetected(function(result) {
+      console.log("Quagga onDetected result:", result);
+      let scannedCode = result.codeResult.code;
+      scannedCode = scannedCode.trim();
+      console.log("Gescannt:", scannedCode);
+      document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
+      // Nur fortfahren, wenn kein anderes Scan-Modal offen ist
+      if (document.getElementById("scannedModal").style.display === "none") {
+        handleScannedBarcode(scannedCode);
+      }
+    });
+  }
 
 /* --------------- Initialisierung beim Laden der Seite --------------- */
 window.onload = function() {
