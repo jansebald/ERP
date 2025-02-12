@@ -10,7 +10,40 @@ let lagerbestand = JSON.parse(localStorage.getItem("lagerbestand")) || [];
 let currentScannedItem = null;
 
 /* --------------- Funktionen für Dropdowns und Lagerbestand --------------- */
-
+function levenshtein(a, b) {
+    const m = a.length;
+    const n = b.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    
+    const matrix = [];
+    
+    // Initialisiere die erste Spalte
+    for (let i = 0; i <= m; i++) {
+      matrix[i] = [i];
+    }
+    // Initialisiere die erste Zeile
+    for (let j = 0; j <= n; j++) {
+      matrix[0][j] = j;
+    }
+    
+    // Fülle die Matrix
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (a.charAt(i - 1) === b.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,  // Ersetzen
+            matrix[i][j - 1] + 1,      // Einfügen
+            matrix[i - 1][j] + 1       // Löschen
+          );
+        }
+      }
+    }
+    
+    return matrix[m][n];
+  }
 // Lagerorte in die Dropdown-Menüs laden
 function ladeLagerorte() {
     console.log("ladeLagerorte wird ausgeführt");
@@ -324,22 +357,34 @@ function printBarcode() {
   
 // Diese Funktion wird nur einmal definiert und bereinigt den gescannten Code
 function handleScannedBarcode(scannedCode) {
-    scannedCode = scannedCode.trim().replace(/[\n\r]+/g, "");
-    console.log("Original gescannt:", scannedCode);
-    // In Großbuchstaben umwandeln und bereinigen:
-    scannedCode = cleanScannedCode(scannedCode.toUpperCase());
-    console.log("Bereinigt gescannt:", scannedCode);
-    
+    // Bereinige den gescannten Code: trimme Leerzeichen, entferne Zeilenumbrüche und konvertiere in Großbuchstaben
+    scannedCode = scannedCode.trim().toUpperCase().replace(/[\n\r]+/g, "");
+    console.log("Gescannt:", scannedCode);
     console.log("Gespeicherte Barcodes:", lagerbestand.map(p => p.barcode).join(", "));
-    const item = lagerbestand.find(p =>
-      p.barcode.trim().toUpperCase() === scannedCode
-    );
-    if (!item) {
+  
+    let bestMatch = null;
+    let bestDistance = Infinity;
+    // Vergleiche den gescannten Code mit jedem gespeicherten Barcode
+    lagerbestand.forEach(item => {
+      const storedCode = item.barcode.trim().toUpperCase();
+      const distance = levenshtein(scannedCode, storedCode);
+      console.log(`Vergleiche ${scannedCode} mit ${storedCode} -> Abstand: ${distance}`);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestMatch = item;
+      }
+    });
+  
+    // Schwellenwert festlegen (z. B. 2; du kannst diesen Wert nach Bedarf anpassen)
+    const threshold = 2;
+    if (bestDistance <= threshold && bestMatch) {
+      currentScannedItem = bestMatch;
+      // Finde den Index des besten Matches im Array, um das Modal zu öffnen
+      const index = lagerbestand.indexOf(bestMatch);
+      openProductModal(index);
+    } else {
       alert("Ware nicht gefunden! (Scanned: " + scannedCode + ")");
-      return;
     }
-    currentScannedItem = item;
-    openProductModal(lagerbestand.indexOf(item));
   }
   
 /* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
