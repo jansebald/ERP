@@ -256,23 +256,17 @@ function closeProductModal() {
   
 // Öffnet ein neues Fenster mit dem Barcode, um diesen zu drucken
 function printBarcode() {
-    // Hole den Barcode-Wert aus dem Element im Modal
+    // Barcode-Wert aus dem Modal holen
     const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
     if (!barcodeValue) {
       alert("Kein Barcode verfügbar!");
       return;
     }
     
-    // Prüfe, ob der Browser vermutlich auf einem mobilen Gerät läuft.
-    // Hier verwenden wir als einfache Bedingung, dass die Fensterbreite kleiner als 500px ist.
-    const isMobile = window.innerWidth < 500;
-    // Auf mobilen Geräten wollen wir die Balken etwas schmaler, damit sie näher zusammen liegen.
-    const barcodeWidthValue = isMobile ? 2 : 4;  // 2 px für mobile, 4 px für Desktop
-    const barcodeHeightValue = isMobile ? 80 : 100; // ggf. auch die Höhe anpassen
-  
-    // Öffne ein neues Fenster für den Druck (Größe kannst du anpassen)
+    // Neues Fenster für den Druck öffnen – feste Fenstergröße
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-  
+    
+    // HTML für das Druckfenster schreiben, dabei feste Parameter für den Barcode setzen:
     printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="de">
@@ -300,11 +294,11 @@ function printBarcode() {
       <body>
         <svg id="barcode"></svg>
         <script>
-          // Barcode in voller Größe generieren
+          // Hier werden feste Werte genutzt, die für den Druck optimiert sind:
           JsBarcode("#barcode", "${barcodeValue}", {
             format: "CODE128",
-            width: ${barcodeWidthValue},
-            height: ${barcodeHeightValue},
+            width: 4,      // Feste Balkenbreite, unabhängig vom Gerät
+            height: 100,   // Feste Höhe
             displayValue: true,
             margin: 10
           });
@@ -312,10 +306,10 @@ function printBarcode() {
       </body>
       </html>
     `);
-  
+    
     printWindow.document.close();
-  
-    // Gib dem Barcode etwas Zeit zum Rendern, dann drucke und schließe das Fenster
+    
+    // Warte kurz, damit der Barcode vollständig gerendert wird, und starte dann den Druck
     setTimeout(() => {
       printWindow.focus();
       printWindow.print();
