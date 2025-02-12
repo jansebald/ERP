@@ -137,3 +137,28 @@
     font-size: 1em;
     background-color: #f9f9f9;
   }
+
+  /* Beispiel: Anpassungen für Bildschirme kleiner als 600px */
+@media (max-width: 600px) {
+    .container {
+      width: 95%;
+      padding: 10px;
+    }
+  
+    nav ul {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    table, th, td {
+      font-size: 0.9em;
+    }
+  }
+
+  #barcodeSvg {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+  }
