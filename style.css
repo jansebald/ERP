@@ -172,8 +172,14 @@
     }
   }
 
-  #modalBarcodeSvg {
+/* Das Barcode-SVG im Modal responsiv machen */
+#modalBarcodeSvg {
     max-width: 100%;
     height: auto;
     width: auto;
+  }
+
+  /* Falls der Barcode-Container zu breit sein könnte – Scrollen ermöglichen */
+#modalBarcodeContainer {
+    overflow-x: auto;
   }

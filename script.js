@@ -176,7 +176,7 @@ function einbuchen() {
 
   clearInputs();
   zeigeLagerbestand();
-  generateBarcodeLabel(uniqueId);
+  // generateBarcodeLabel(uniqueId);
 }
 
 // Ausbuchen über das klassische Formular
@@ -334,10 +334,17 @@ function openProductModal(index) {
       </div>
     `;
   
-    // Wähle die Barcode-Breite abhängig von der Fensterbreite
-    let barcodeWidth = window.innerWidth < 600 ? 1 : 2; // z. B. 1 für mobile Geräte, 2 für größere Bildschirme
+    // Dynamische Anpassung der Barcode-Strichdicke abhängig von der Fensterbreite:
+    let barcodeWidth;
+    if (window.innerWidth < 400) {
+      barcodeWidth = 0.8;
+    } else if (window.innerWidth < 600) {
+      barcodeWidth = 1;
+    } else {
+      barcodeWidth = 2;
+    }
   
-    // Generiere den Barcode sofort im Modal
+    // Generiere den Barcode im Modal
     JsBarcode("#modalBarcodeSvg", produkt.barcode, {
       format: "CODE128",
       width: barcodeWidth,
