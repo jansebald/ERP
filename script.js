@@ -256,17 +256,23 @@ function closeProductModal() {
   
 // Öffnet ein neues Fenster mit dem Barcode, um diesen zu drucken
 function printBarcode() {
-    // Hole den Barcode-Wert (angenommen, er steht im Element "modalBarcodeValue")
+    // Hole den Barcode-Wert aus dem Element im Modal
     const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
     if (!barcodeValue) {
       alert("Kein Barcode verfügbar!");
       return;
     }
     
-    // Öffne ein neues Fenster mit ausreichenden Dimensionen
+    // Prüfe, ob der Browser vermutlich auf einem mobilen Gerät läuft.
+    // Hier verwenden wir als einfache Bedingung, dass die Fensterbreite kleiner als 500px ist.
+    const isMobile = window.innerWidth < 500;
+    // Auf mobilen Geräten wollen wir die Balken etwas schmaler, damit sie näher zusammen liegen.
+    const barcodeWidthValue = isMobile ? 2 : 4;  // 2 px für mobile, 4 px für Desktop
+    const barcodeHeightValue = isMobile ? 80 : 100; // ggf. auch die Höhe anpassen
+  
+    // Öffne ein neues Fenster für den Druck (Größe kannst du anpassen)
     const printWindow = window.open('', '_blank', 'width=800,height=600');
-    
-    // Schreibe die HTML-Struktur für das Druckfenster, inklusive Einbindung von JsBarcode
+  
     printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="de">
@@ -285,8 +291,7 @@ function printBarcode() {
             background: #fff;
           }
           #barcode {
-            width: 100%;
-            max-width: 600px; /* Maximale Breite, kann angepasst werden */
+            max-width: 100%;
           }
         </style>
         <!-- JsBarcode einbinden -->
@@ -295,22 +300,22 @@ function printBarcode() {
       <body>
         <svg id="barcode"></svg>
         <script>
-          // Generiere den Barcode in größerer Darstellung
+          // Barcode in voller Größe generieren
           JsBarcode("#barcode", "${barcodeValue}", {
             format: "CODE128",
-            width: 4,        // Erhöhte Balkenbreite für bessere Druckqualität
-            height: 100,     // Erhöhte Höhe
-            displayValue: true
+            width: ${barcodeWidthValue},
+            height: ${barcodeHeightValue},
+            displayValue: true,
+            margin: 10
           });
         <\/script>
       </body>
       </html>
     `);
-    
-    // Schließe das Dokument, damit der Inhalt gerendert wird
+  
     printWindow.document.close();
-    
-    // Füge eine kurze Verzögerung hinzu, damit der Barcode vollständig gerendert wird
+  
+    // Gib dem Barcode etwas Zeit zum Rendern, dann drucke und schließe das Fenster
     setTimeout(() => {
       printWindow.focus();
       printWindow.print();
