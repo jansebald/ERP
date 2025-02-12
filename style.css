@@ -171,3 +171,9 @@
       padding: 15px;
     }
   }
+
+  #modalBarcodeSvg {
+    max-width: 100%;
+    height: auto;
+    width: auto;
+  }

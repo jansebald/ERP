@@ -334,10 +334,13 @@ function openProductModal(index) {
       </div>
     `;
   
+    // Wähle die Barcode-Breite abhängig von der Fensterbreite
+    let barcodeWidth = window.innerWidth < 600 ? 1 : 2; // z. B. 1 für mobile Geräte, 2 für größere Bildschirme
+  
     // Generiere den Barcode sofort im Modal
     JsBarcode("#modalBarcodeSvg", produkt.barcode, {
       format: "CODE128",
-      width: 2,
+      width: barcodeWidth,
       height: 50,
       displayValue: false
     });
