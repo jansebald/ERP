@@ -183,3 +183,8 @@
 #modalBarcodeContainer {
     overflow-x: auto;
   }
+
+  /* Stelle sicher, dass der Barcode-Container standardmäßig verborgen bleibt */
+#etikettContainer {
+    display: none !important;
+  }

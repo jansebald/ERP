@@ -141,43 +141,43 @@ function zeigeGefiltertenLagerbestand(filteredLagerbestand) {
 
 // Einbuchen eines Produkts inklusive Barcode-Generierung und Erfassung des Buchungszeitpunkts
 function einbuchen() {
-  const produktname = document.getElementById("produktname").value.trim();
-  const menge = parseInt(document.getElementById("menge").value);
-  const mhd = document.getElementById("mhd").value;
-  const lagerort = document.getElementById("lagerortEinbuchen").value;
-
-  if (!produktname || !menge || !mhd || !lagerort) {
-    alert("Bitte alle Felder ausfüllen!");
-    return;
+    const produktname = document.getElementById("produktname").value.trim();
+    const menge = parseInt(document.getElementById("menge").value);
+    const mhd = document.getElementById("mhd").value;
+    const lagerort = document.getElementById("lagerortEinbuchen").value;
+  
+    if (!produktname || !menge || !mhd || !lagerort) {
+      alert("Bitte alle Felder ausfüllen!");
+      return;
+    }
+    if (menge <= 0) {
+      alert("Die Menge muss größer als 0 sein.");
+      return;
+    }
+  
+    // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
+    const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
+  
+    // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
+    const neuerEintrag = {
+      produktname,
+      menge,
+      mhd,
+      lagerort,
+      barcode: uniqueId,
+      eingebuchtAm: new Date().toLocaleString()
+    };
+  
+    lagerbestand.push(neuerEintrag);
+    localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
+  
+    alert(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
+  
+    clearInputs();
+    zeigeLagerbestand();
+  
+    // NICHT: generateBarcodeLabel(uniqueId);
   }
-
-  if (menge <= 0) {
-    alert("Die Menge muss größer als 0 sein.");
-    return;
-  }
-
-  // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
-  const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-
-  // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
-  const neuerEintrag = {
-    produktname,
-    menge,
-    mhd,
-    lagerort,
-    barcode: uniqueId,
-    eingebuchtAm: new Date().toLocaleString()
-  };
-
-  lagerbestand.push(neuerEintrag);
-  localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-
-  alert(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
-
-  clearInputs();
-  zeigeLagerbestand();
-  // generateBarcodeLabel(uniqueId);
-}
 
 // Ausbuchen über das klassische Formular
 function ausbuchen() {
@@ -321,7 +321,7 @@ function openProductModal(index) {
     const modal = document.getElementById("productModal");
     const content = document.getElementById("productDetailContent");
   
-    // Fülle das Modal mit den Produktdetails inklusive Barcode
+    // Fülle das Modal mit den Basisinformationen inklusive Barcode
     content.innerHTML = `
       <p><strong>Produkt:</strong> ${produkt.produktname}</p>
       <p><strong>Menge:</strong> ${produkt.menge}</p>
@@ -334,7 +334,7 @@ function openProductModal(index) {
       </div>
     `;
   
-    // Dynamische Anpassung der Barcode-Strichdicke abhängig von der Fensterbreite:
+    // Dynamische Anpassung der Barcode-Strichdicke abhängig von der Fensterbreite
     let barcodeWidth;
     if (window.innerWidth < 400) {
       barcodeWidth = 0.8;
