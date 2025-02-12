@@ -352,6 +352,25 @@ function toggleBarcodeDisplay(barcodeValue) {
     }
   }
 
+  // Beispiel: Statt direkt im HTML:
+// <tr onclick="openProductModal(${index})" style="cursor: pointer;"> ... </tr>
+// ... kannst du das dynamisch mit JavaScript machen:
+function addRowEventListeners() {
+    const rows = document.querySelectorAll("#lagerbestandTabelle tr");
+    rows.forEach(row => {
+      row.addEventListener("click", function() {
+        // Hier kannst du z.B. einen Datensatzindex aus einem data-Attribut auslesen
+        const index = this.getAttribute("data-index");
+        openProductModal(index);
+      });
+      // Zusätzlich für Touch:
+      row.addEventListener("touchend", function() {
+        const index = this.getAttribute("data-index");
+        openProductModal(index);
+      });
+    });
+  }
+
 // Schließt das Produkt-Detail Modal
 function closeProductModal() {
   document.getElementById("productModal").style.display = "none";
