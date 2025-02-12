@@ -97,7 +97,8 @@
           }
         },
         decoder: {
-          readers: ["ean_reader", "ean_8_reader", "upc_reader"]
+          // Verwende den Code 128 Reader, um dein Barcode-Format zu erkennen
+          readers: ["code_128_reader"]
         }
       }, function(err) {
         if (err) {
@@ -106,7 +107,7 @@
         }
         Quagga.start();
       });
-
+  
       // Barcode-Erkennung
       Quagga.onDetected(function(result) {
         const barcode = result.codeResult.code;
@@ -117,7 +118,7 @@
         }
       });
     }
-
+  
     startScanner();
   </script>
   <script src="script.js"></script>
