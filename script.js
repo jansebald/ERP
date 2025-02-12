@@ -13,39 +13,40 @@ let currentScannedItem = null;
 
 // Lagerorte in die Dropdown-Menüs laden
 function ladeLagerorte() {
-  const einbuchenDropdown = document.getElementById("lagerortEinbuchen");
-  const ausbuchenDropdown = document.getElementById("lagerortAusbuchen");
-
-  if (einbuchenDropdown) {
-    einbuchenDropdown.innerHTML = "";
-    const defaultOption = document.createElement("option");
-    defaultOption.textContent = "Bitte wählen...";
-    defaultOption.value = "";
-    einbuchenDropdown.appendChild(defaultOption);
-
-    lagerorte.forEach(lagerort => {
-      const option = document.createElement("option");
-      option.value = lagerort;
-      option.textContent = lagerort;
-      einbuchenDropdown.appendChild(option);
-    });
+    console.log("ladeLagerorte wird ausgeführt");
+    const einbuchenDropdown = document.getElementById("lagerortEinbuchen");
+    const ausbuchenDropdown = document.getElementById("lagerortAusbuchen");
+  
+    if (einbuchenDropdown) {
+      einbuchenDropdown.innerHTML = "";
+      const defaultOption = document.createElement("option");
+      defaultOption.textContent = "Bitte wählen...";
+      defaultOption.value = "";
+      einbuchenDropdown.appendChild(defaultOption);
+  
+      lagerorte.forEach(lagerort => {
+        const option = document.createElement("option");
+        option.value = lagerort;
+        option.textContent = lagerort;
+        einbuchenDropdown.appendChild(option);
+      });
+    }
+  
+    if (ausbuchenDropdown) {
+      ausbuchenDropdown.innerHTML = "";
+      const defaultOption = document.createElement("option");
+      defaultOption.textContent = "Bitte wählen...";
+      defaultOption.value = "";
+      ausbuchenDropdown.appendChild(defaultOption);
+  
+      lagerorte.forEach(lagerort => {
+        const option = document.createElement("option");
+        option.value = lagerort;
+        option.textContent = lagerort;
+        ausbuchenDropdown.appendChild(option);
+      });
+    }
   }
-
-  if (ausbuchenDropdown) {
-    ausbuchenDropdown.innerHTML = "";
-    const defaultOption = document.createElement("option");
-    defaultOption.textContent = "Bitte wählen...";
-    defaultOption.value = "";
-    ausbuchenDropdown.appendChild(defaultOption);
-
-    lagerorte.forEach(lagerort => {
-      const option = document.createElement("option");
-      option.value = lagerort;
-      option.textContent = lagerort;
-      ausbuchenDropdown.appendChild(option);
-    });
-  }
-}
 
 // Eingabefelder leeren
 function clearInputs() {
