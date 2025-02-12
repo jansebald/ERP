@@ -10,6 +10,7 @@ let lagerbestand = JSON.parse(localStorage.getItem("lagerbestand")) || [];
 let currentScannedItem = null;
 
 /* --------------- Funktionen für Dropdowns und Lagerbestand --------------- */
+// Levenshtein-Funktion zur Berechnung der Ähnlichkeit
 function levenshtein(a, b) {
     const m = a.length;
     const n = b.length;
@@ -18,31 +19,68 @@ function levenshtein(a, b) {
     
     const matrix = [];
     
-    // Initialisiere die erste Spalte
     for (let i = 0; i <= m; i++) {
       matrix[i] = [i];
     }
-    // Initialisiere die erste Zeile
     for (let j = 0; j <= n; j++) {
       matrix[0][j] = j;
     }
     
-    // Fülle die Matrix
     for (let i = 1; i <= m; i++) {
       for (let j = 1; j <= n; j++) {
         if (a.charAt(i - 1) === b.charAt(j - 1)) {
           matrix[i][j] = matrix[i - 1][j - 1];
         } else {
           matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,  // Ersetzen
-            matrix[i][j - 1] + 1,      // Einfügen
-            matrix[i - 1][j] + 1       // Löschen
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
           );
         }
       }
     }
-    
     return matrix[m][n];
+  }
+  
+  // Funktion, die den Barcode bereinigt: Entfernt alle Zeichen außer A-Z, 0-9 und Bindestrich, und wandelt in Großbuchstaben um.
+  function cleanCode(code) {
+    return code.replace(/[^A-Z0-9-]/gi, "").toUpperCase();
+  }
+  
+  // Angepasste handleScannedBarcode-Funktion
+  function handleScannedBarcode(scannedCode) {
+    // Ursprünglichen gescannten Code bereinigen
+    const cleanedScanned = cleanCode(scannedCode);
+    console.log("Original gescannt:", scannedCode);
+    console.log("Bereinigt gescannt:", cleanedScanned);
+  
+    // Prüfe, ob der bereinigte Code mit "WARE-" beginnt (wie in deinem Format vorgesehen)
+    if (!cleanedScanned.startsWith("WARE-")) {
+      alert("Ungültiger Barcode erkannt: " + cleanedScanned + "\nBitte verbessere die Scanbedingungen (Beleuchtung, Druckqualität etc.).");
+      return;
+    }
+    
+    // Fuzzy Matching: Vergleiche den bereinigten gescannten Barcode mit den gespeicherten Barcodes
+    let bestMatch = null;
+    let bestDistance = Infinity;
+    lagerbestand.forEach(item => {
+      const cleanedStored = cleanCode(item.barcode);
+      const distance = levenshtein(cleanedScanned, cleanedStored);
+      console.log(`Vergleiche ${cleanedScanned} mit ${cleanedStored} -> Abstand: ${distance}`);
+      if (distance < bestDistance) {
+        bestDistance = distance;
+        bestMatch = item;
+      }
+    });
+    
+    // Schwellenwert festlegen (z.B. 2) – passe diesen Wert ggf. an
+    const threshold = 2;
+    if (bestDistance <= threshold && bestMatch) {
+      currentScannedItem = bestMatch;
+      openProductModal(lagerbestand.indexOf(bestMatch));
+    } else {
+      alert("Ware nicht gefunden! (Bereinigt gescannt: " + cleanedScanned + ")");
+    }
   }
 // Lagerorte in die Dropdown-Menüs laden
 function ladeLagerorte() {
