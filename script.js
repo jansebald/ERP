@@ -19,15 +19,9 @@ function levenshtein(a, b) {
   for (let j = 0; j <= n; j++) { matrix[0][j] = j; }
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
-      if (a.charAt(i - 1) === b.charAt(j - 1)) {
-        matrix[i][j] = matrix[i - 1][j - 1];
-      } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1
-        );
-      }
+      matrix[i][j] = a.charAt(i - 1) === b.charAt(j - 1)
+        ? matrix[i - 1][j - 1]
+        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
     }
   }
   return matrix[m][n];
@@ -44,7 +38,7 @@ function handleScannedBarcode(scannedCode) {
   console.log("Bereinigt gescannt:", cleanedScanned);
   
   if (!cleanedScanned.startsWith("WARE-")) {
-    notify("Ungültiger Barcode erkannt: " + cleanedScanned + "\nBitte verbessere die Scanbedingungen (Beleuchtung, Druckqualität etc.).");
+    notify("Ungültiger Barcode: " + cleanedScanned);
     return;
   }
   
@@ -66,36 +60,39 @@ function handleScannedBarcode(scannedCode) {
     const index = lagerbestand.indexOf(bestMatch);
     openProductModal(index);
   } else {
-    notify("Ware nicht gefunden! (Bereinigt gescannt: " + cleanedScanned + ")");
+    notify("Ware nicht gefunden! (Bereinigt: " + cleanedScanned + ")");
   }
 }
 
-// Dropdowns und Lagerbestand anzeigen
+// UI-Funktionen, die nur aktiv werden, wenn die Elemente existieren
+
 function ladeLagerorte() {
   console.log("ladeLagerorte wird ausgeführt");
   const einbuchenDropdown = document.getElementById("lagerortEinbuchen");
   const ausbuchenDropdown = document.getElementById("lagerortAusbuchen");
+  
   if (einbuchenDropdown) {
     einbuchenDropdown.innerHTML = "";
-    const defaultOption = document.createElement("option");
+    let defaultOption = document.createElement("option");
     defaultOption.textContent = "Bitte wählen...";
     defaultOption.value = "";
     einbuchenDropdown.appendChild(defaultOption);
     lagerorte.forEach(lagerort => {
-      const option = document.createElement("option");
+      let option = document.createElement("option");
       option.value = lagerort;
       option.textContent = lagerort;
       einbuchenDropdown.appendChild(option);
     });
   }
+  
   if (ausbuchenDropdown) {
     ausbuchenDropdown.innerHTML = "";
-    const defaultOption = document.createElement("option");
+    let defaultOption = document.createElement("option");
     defaultOption.textContent = "Bitte wählen...";
     defaultOption.value = "";
     ausbuchenDropdown.appendChild(defaultOption);
     lagerorte.forEach(lagerort => {
-      const option = document.createElement("option");
+      let option = document.createElement("option");
       option.value = lagerort;
       option.textContent = lagerort;
       ausbuchenDropdown.appendChild(option);
@@ -104,9 +101,8 @@ function ladeLagerorte() {
 }
 
 function clearInputs() {
-  const ids = ["produktname", "menge", "mhd", "ausbuchenProdukt", "ausbuchenMenge", "lagerortEinbuchen", "lagerortAusbuchen"];
-  ids.forEach(id => {
-    const elem = document.getElementById(id);
+  ["produktname", "menge", "mhd", "ausbuchenProdukt", "ausbuchenMenge", "lagerortEinbuchen", "lagerortAusbuchen"].forEach(id => {
+    let elem = document.getElementById(id);
     if (elem) { elem.value = ""; }
   });
 }
@@ -122,9 +118,8 @@ function zeigeLagerbestand() {
   }
   
   lagerbestand.forEach((produkt, index) => {
-    const row = document.createElement("tr");
+    let row = document.createElement("tr");
     row.style.cursor = "pointer";
-    row.setAttribute("data-index", index);
     row.innerHTML = `
       <td>${produkt.produktname}</td>
       <td>${produkt.menge}</td>
@@ -132,22 +127,21 @@ function zeigeLagerbestand() {
       <td>${produkt.lagerort}</td>
     `;
     row.addEventListener("click", () => openProductModal(index));
-    row.addEventListener("touchend", () => openProductModal(index));
     tabelle.appendChild(row);
   });
 }
 
 function allePositionenLoeschen() {
-  if (confirm("Möchten Sie wirklich alle Positionen im Lagerbestand löschen?")) {
+  if (confirm("Alle Positionen wirklich löschen?")) {
     lagerbestand = [];
     localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
     zeigeLagerbestand();
-    notify("Der Lagerbestand wurde erfolgreich geleert.");
+    notify("Lagerbestand geleert.");
   }
 }
 
 function sucheLagerbestand() {
-  const searchQuery = document.getElementById("search").value.toLowerCase();
+  const searchQuery = (document.getElementById("search") || {}).value.toLowerCase();
   const filtered = lagerbestand.filter(produkt =>
     produkt.produktname.toLowerCase().includes(searchQuery) ||
     produkt.lagerort.toLowerCase().includes(searchQuery)
@@ -157,13 +151,14 @@ function sucheLagerbestand() {
 
 function zeigeGefiltertenLagerbestand(filtered) {
   const tabelle = document.getElementById("lagerbestandTabelle");
+  if (!tabelle) return;
   tabelle.innerHTML = "";
   if (filtered.length === 0) {
     tabelle.innerHTML = "<tr><td colspan='4'>Keine Produkte gefunden.</td></tr>";
     return;
   }
   filtered.forEach((produkt, index) => {
-    const row = document.createElement("tr");
+    let row = document.createElement("tr");
     row.style.cursor = "pointer";
     row.innerHTML = `
       <td>${produkt.produktname}</td>
@@ -178,49 +173,42 @@ function zeigeGefiltertenLagerbestand(filtered) {
 
 // Einbuchen und Ausbuchen
 function einbuchen() {
-  const produktname = document.getElementById("produktname").value.trim();
-  const menge = parseInt(document.getElementById("menge").value);
-  const mhd = document.getElementById("mhd").value;
-  const lagerort = document.getElementById("lagerortEinbuchen").value;
+  const produktname = (document.getElementById("produktname") || {}).value.trim();
+  const menge = parseInt((document.getElementById("menge") || {}).value);
+  const mhd = (document.getElementById("mhd") || {}).value;
+  const lagerort = (document.getElementById("lagerortEinbuchen") || {}).value;
   
   if (!produktname || !menge || !mhd || !lagerort) {
     notify("Bitte alle Felder ausfüllen!");
     return;
   }
   if (menge <= 0) {
-    notify("Die Menge muss größer als 0 sein.");
+    notify("Menge muss > 0 sein!");
     return;
   }
   
   const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-  const neuerEintrag = {
-    produktname,
-    menge,
-    mhd,
-    lagerort,
-    barcode: uniqueId,
-    eingebuchtAm: new Date().toLocaleString()
-  };
+  let neuerEintrag = { produktname, menge, mhd, lagerort, barcode: uniqueId, eingebuchtAm: new Date().toLocaleString() };
   
   lagerbestand.push(neuerEintrag);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
   
-  notify(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
+  notify(`${menge} von ${produktname} eingebucht.`);
   clearInputs();
   zeigeLagerbestand();
 }
 
 function ausbuchen() {
-  const produktname = document.getElementById("ausbuchenProdukt").value.trim();
-  const menge = parseInt(document.getElementById("ausbuchenMenge").value);
-  const lagerort = document.getElementById("lagerortAusbuchen").value;
+  const produktname = (document.getElementById("ausbuchenProdukt") || {}).value.trim();
+  const menge = parseInt((document.getElementById("ausbuchenMenge") || {}).value);
+  const lagerort = (document.getElementById("lagerortAusbuchen") || {}).value;
   
   if (!produktname || !menge || !lagerort) {
     notify("Bitte alle Felder ausfüllen!");
     return;
   }
   if (menge <= 0) {
-    notify("Die Menge muss größer als 0 sein.");
+    notify("Menge muss > 0 sein!");
     return;
   }
   
@@ -229,17 +217,17 @@ function ausbuchen() {
   );
   
   if (index !== -1) {
-    const produkt = lagerbestand[index];
+    let produkt = lagerbestand[index];
     if (produkt.menge >= menge) {
       produkt.menge -= menge;
       if (produkt.menge === 0) { lagerbestand.splice(index, 1); }
       localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-      notify(`${menge} von ${produktname} aus Lagerort ${lagerort} erfolgreich ausgebucht.`);
+      notify(`${menge} von ${produktname} ausgebucht.`);
     } else {
-      notify("Nicht genügend Bestand verfügbar!");
+      notify("Nicht genügend Bestand!");
     }
   } else {
-    notify("Produkt oder Lagerort nicht gefunden!");
+    notify("Produkt/Lagerort nicht gefunden!");
   }
   
   clearInputs();
@@ -249,9 +237,10 @@ function ausbuchen() {
 // Produkt-Detail Modal
 function openProductModal(index) {
   const produkt = lagerbestand[index];
+  if (!produkt) return;
   const modal = document.getElementById("productModal");
+  if (!modal) return;
   const content = document.getElementById("productDetailContent");
-  
   content.innerHTML = `
     <p><strong>Produkt:</strong> ${produkt.produktname}</p>
     <p><strong>Menge:</strong> ${produkt.menge}</p>
@@ -263,30 +252,23 @@ function openProductModal(index) {
       <p id="modalBarcodeValue">${produkt.barcode}</p>
     </div>
   `;
-  
-  let barcodeWidth = window.innerWidth < 400 ? 0.8 : (window.innerWidth < 600 ? 1 : 2);
-  JsBarcode("#modalBarcodeSvg", produkt.barcode, {
-    format: "CODE128",
-    width: barcodeWidth,
-    height: 50,
-    displayValue: false
-  });
-  
+  let barcodeWidth = window.innerWidth < 400 ? 0.8 : window.innerWidth < 600 ? 1 : 2;
+  JsBarcode("#modalBarcodeSvg", produkt.barcode, { format: "CODE128", width: barcodeWidth, height: 50, displayValue: false });
   modal.style.display = "block";
 }
 
 function closeProductModal() {
-  document.getElementById("productModal").style.display = "none";
+  let modal = document.getElementById("productModal");
+  if (modal) { modal.style.display = "none"; }
 }
 
 function printBarcode() {
-  const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
+  const barcodeValue = (document.getElementById("modalBarcodeValue") || {}).textContent.trim();
   if (!barcodeValue) {
-    notify("Kein Barcode verfügbar!");
+    notify("Kein Barcode vorhanden!");
     return;
   }
-  
-  const printWindow = window.open('', '_blank', 'width=800,height=600,resizable=yes');
+  let printWindow = window.open('', '_blank', 'width=800,height=600,resizable=yes');
   printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="de">
@@ -303,23 +285,13 @@ function printBarcode() {
       <body>
         <svg id="barcode"></svg>
         <script>
-          JsBarcode("#barcode", "${barcodeValue}", {
-            format: "CODE128",
-            width: 4,
-            height: 100,
-            displayValue: true,
-            margin: 10
-          });
+          JsBarcode("#barcode", "${barcodeValue}", { format: "CODE128", width: 4, height: 100, displayValue: true, margin: 10 });
         <\/script>
       </body>
       </html>
     `);
   printWindow.document.close();
-  setTimeout(() => {
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
-  }, 500);
+  setTimeout(() => { printWindow.focus(); printWindow.print(); printWindow.close(); }, 500);
 }
 
 // Snackbar-Benachrichtigung
@@ -334,110 +306,69 @@ function notify(message) {
   }
 }
 
-// Quagga Barcode-Scanner Initialisierung
+// Quagga Barcode-Scanner Initialisierung (nur wenn Container vorhanden)
 function initScanner() {
-  if (typeof Quagga !== "undefined") {
+  if (typeof Quagga !== "undefined" && document.querySelector("#scanner-container")) {
     Quagga.init({
       inputStream: {
         name: "Live",
         type: "LiveStream",
         target: document.querySelector("#scanner-container"),
-        constraints: {
-          facingMode: "environment",
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
-        }
+        constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
       },
-      decoder: {
-        readers: ["code_128_reader"],
-        multiple: false
-      },
+      decoder: { readers: ["code_128_reader"], multiple: false },
       locate: true
     }, function(err) {
-      if (err) {
-        console.error("Quagga init error:", err);
-        notify("Fehler beim Initialisieren des Scanners: " + err);
-        return;
-      }
-      console.log("Quagga wurde erfolgreich initialisiert.");
+      if (err) { console.error("Quagga init error:", err); notify("Scanner-Fehler: " + err); return; }
+      console.log("Quagga initialisiert.");
       Quagga.start();
     });
-  
-    Quagga.onDetected(function(result) {
+    Quagga.onDetected(result => {
       if (result && result.codeResult && result.codeResult.code) {
         let scannedCode = result.codeResult.code;
-        const resultElem = document.getElementById("barcode-result");
-        if (resultElem) {
-          resultElem.innerText = `Gescannt: ${scannedCode}`;
-        }
+        let resultElem = document.getElementById("barcode-result");
+        if (resultElem) { resultElem.innerText = `Gescannt: ${scannedCode}`; }
         handleScannedBarcode(scannedCode);
-      } else {
-        console.log("Kein gültiger Barcode erkannt.");
       }
     });
   }
 }
 
-// Alles in einem DOMContentLoaded-Handler bündeln
-document.addEventListener("DOMContentLoaded", function() {
+// DOMContentLoaded – seitenkontextabhängige Initialisierung
+document.addEventListener("DOMContentLoaded", () => {
+  // Gemeinsame Funktionen
   ladeLagerorte();
   zeigeLagerbestand();
   
-  // Eventlistener für Buttons
-  const btnEinbuchen = document.getElementById("btnEinbuchen");
-  if (btnEinbuchen) btnEinbuchen.addEventListener("click", einbuchen);
+  // Index-spezifische Buttons
+  let btnEinbuchen = document.getElementById("btnEinbuchen");
+  if (btnEinbuchen) { btnEinbuchen.addEventListener("click", einbuchen); }
   
-  const btnAusbuchen = document.getElementById("btnAusbuchen");
-  if (btnAusbuchen) btnAusbuchen.addEventListener("click", ausbuchen);
+  let btnAusbuchen = document.getElementById("btnAusbuchen");
+  if (btnAusbuchen) { btnAusbuchen.addEventListener("click", ausbuchen); }
   
-  const btnZeigeLagerbestand = document.getElementById("btnZeigeLagerbestand");
-  if (btnZeigeLagerbestand) btnZeigeLagerbestand.addEventListener("click", zeigeLagerbestand);
+  let btnZeigeLagerbestand = document.getElementById("btnZeigeLagerbestand");
+  if (btnZeigeLagerbestand) { btnZeigeLagerbestand.addEventListener("click", zeigeLagerbestand); }
   
-  const btnAllePositionenLoeschen = document.getElementById("btnAllePositionenLoeschen");
-  if (btnAllePositionenLoeschen) btnAllePositionenLoeschen.addEventListener("click", allePositionenLoeschen);
+  let btnAllePositionenLoeschen = document.getElementById("btnAllePositionenLoeschen");
+  if (btnAllePositionenLoeschen) { btnAllePositionenLoeschen.addEventListener("click", allePositionenLoeschen); }
   
-  const searchInput = document.getElementById("search");
-  if (searchInput) searchInput.addEventListener("keyup", sucheLagerbestand);
+  let searchInput = document.getElementById("search");
+  if (searchInput) { searchInput.addEventListener("keyup", sucheLagerbestand); }
   
-  const btnCloseEtikett = document.getElementById("btnCloseEtikett");
-  if (btnCloseEtikett) btnCloseEtikett.addEventListener("click", () => {
-    document.getElementById("etikettContainer").style.display = "none";
-  });
-  
-  const btnCloseProductModal = document.getElementById("btnCloseProductModal");
-  if (btnCloseProductModal) btnCloseProductModal.addEventListener("click", closeProductModal);
-  
-  const btnPrintBarcode = document.getElementById("btnPrintBarcode");
-  if (btnPrintBarcode) btnPrintBarcode.addEventListener("click", printBarcode);
-  
-  // Scanner-spezifische Buttons in scanner.html
-  const btnAusbuchenScanned = document.getElementById("btnAusbuchenScanned");
-  if (btnAusbuchenScanned) btnAusbuchenScanned.addEventListener("click", () => {
-    ausbuchen();
-  });
-  
-  const btnUmlagernScanned = document.getElementById("btnUmlagernScanned");
-  if (btnUmlagernScanned) btnUmlagernScanned.addEventListener("click", () => {
-    document.getElementById("umlagerungSection").style.display = "block";
-  });
-  
-  const btnCloseScannedModal = document.getElementById("btnCloseScannedModal");
-  if (btnCloseScannedModal) btnCloseScannedModal.addEventListener("click", () => {
-    document.getElementById("scannedModal").style.display = "none";
-  });
-  
-  const btnUmlagernConfirm = document.getElementById("btnUmlagernConfirm");
-  if (btnUmlagernConfirm) btnUmlagernConfirm.addEventListener("click", () => {
-    notify("Umlagerung durchgeführt (Platzhalter).");
-  });
-  
-  const btnCancelUmlagerung = document.getElementById("btnCancelUmlagerung");
-  if (btnCancelUmlagerung) btnCancelUmlagerung.addEventListener("click", () => {
-    document.getElementById("umlagerungSection").style.display = "none";
-  });
-  
-  // Scanner initialisieren, falls der Container vorhanden ist
-  if (document.querySelector("#scanner-container")) {
-    initScanner();
+  let btnCloseEtikett = document.getElementById("btnCloseEtikett");
+  if (btnCloseEtikett) { btnCloseEtikett.addEventListener("click", () => { 
+      let etikett = document.getElementById("etikettContainer");
+      if (etikett) etikett.style.display = "none";
+    }); 
   }
+  
+  let btnCloseProductModal = document.getElementById("btnCloseProductModal");
+  if (btnCloseProductModal) { btnCloseProductModal.addEventListener("click", closeProductModal); }
+  
+  let btnPrintBarcode = document.getElementById("btnPrintBarcode");
+  if (btnPrintBarcode) { btnPrintBarcode.addEventListener("click", printBarcode); }
+  
+  // Scanner-spezifische Initialisierung
+  initScanner();
 });
