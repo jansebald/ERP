@@ -31,7 +31,7 @@ function cleanCode(code) {
   return code.replace(/[^A-Z0-9-]/gi, "").toUpperCase();
 }
 
-// Konsolidierte handleScannedBarcode-Funktion
+// Konsolidierte handleScannedBarcode-Funktion (angepasst)
 function handleScannedBarcode(scannedCode) {
   const cleanedScanned = cleanCode(scannedCode);
   console.log("Original gescannt:", scannedCode);
@@ -58,11 +58,61 @@ function handleScannedBarcode(scannedCode) {
   if (bestDistance <= threshold && bestMatch) {
     currentScannedItem = bestMatch;
     const index = lagerbestand.indexOf(bestMatch);
-    openProductModal(index);
+    // Statt des bisherigen Produkt-Detail-Modals öffnen wir jetzt unser Bestätigungs-Modal:
+    openConfirmAusbuchenModal(index);
   } else {
     notify("Ware nicht gefunden! (Bereinigt: " + cleanedScanned + ")");
   }
 }
+
+// Neues Modal für Bestätigung des Ausbuchens
+function openConfirmAusbuchenModal(index) {
+  const produkt = lagerbestand[index];
+  if (!produkt) return;
+  const modal = document.getElementById("confirmAusbuchenModal");
+  const content = document.getElementById("confirmModalContent");
+  content.innerHTML = `
+    <p><strong>Produkt:</strong> ${produkt.produktname}</p>
+    <p><strong>MHD:</strong> ${produkt.mhd}</p>
+    <p><strong>Charge:</strong> ${produkt.barcode}</p>
+  `;
+  modal.style.display = "block";
+}
+
+// Funktion, um ausgebuchte Ware zu verarbeiten (hier wird standardmäßig 1 Einheit ausgebucht)
+function confirmAusbuchenScanned() {
+  if (currentScannedItem) {
+    const index = lagerbestand.indexOf(currentScannedItem);
+    if (index !== -1) {
+      let produkt = lagerbestand[index];
+      // Ganze Charge ausbuchen: Artikel komplett entfernen
+      lagerbestand.splice(index, 1);
+      localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
+      notify(`${produkt.produktname} (Charge ${produkt.barcode}) wurde vollständig ausgebucht.`);
+    }
+  }
+  document.getElementById("confirmAusbuchenModal").style.display = "none";
+}
+
+// DOMContentLoaded – Eventlistener hinzufügen
+document.addEventListener("DOMContentLoaded", () => {
+  // ... (weitere Initialisierungen)
+  
+  // Scanner initialisieren, falls Container vorhanden ist
+  initScanner();
+
+  // Eventlistener für das Ausbuchen-Modal (auf scanner.html)
+  const btnConfirm = document.getElementById("btnConfirmAusbuchen");
+  if (btnConfirm) {
+    btnConfirm.addEventListener("click", confirmAusbuchenScanned);
+  }
+  const btnCancel = document.getElementById("btnCancelAusbuchen");
+  if (btnCancel) {
+    btnCancel.addEventListener("click", () => {
+      document.getElementById("confirmAusbuchenModal").style.display = "none";
+    });
+  }
+});
 
 // UI-Funktionen, die nur aktiv werden, wenn die Elemente existieren
 
@@ -130,6 +180,9 @@ function zeigeLagerbestand() {
     tabelle.appendChild(row);
   });
 }
+
+const btnCloseProductModal = document.getElementById("btnCloseProductModal");
+if (btnCloseProductModal) btnCloseProductModal.addEventListener("click", closeProductModal);
 
 function allePositionenLoeschen() {
   if (confirm("Alle Positionen wirklich löschen?")) {

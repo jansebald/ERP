@@ -7,7 +7,7 @@
   <script src="https://unpkg.com/quagga/dist/quagga.min.js"></script>
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Zusätzliche Styles für den Scanner und das Modal */
+    /* Zusätzliche Styles für Scanner und Modal */
     #scanner-container {
       width: 100%;
       height: 400px;
@@ -19,13 +19,6 @@
       color: green;
       margin-top: 10px;
     }
-    a {
-      text-decoration: none;
-      color: #3498db;
-      font-size: 18px;
-      margin-top: 20px;
-      display: inline-block;
-    }
     /* Modal Styles */
     .modal {
       position: fixed;
@@ -35,7 +28,7 @@
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgba(0, 0, 0, 0.4);
+      background-color: rgba(0,0,0,0.4);
     }
     .modal-content {
       background-color: #fff;
@@ -46,8 +39,10 @@
       max-width: 400px;
       border-radius: 8px;
     }
-    .modal-content button {
-      margin-top: 10px;
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-around;
     }
   </style>
 </head>
@@ -55,35 +50,24 @@
   <div class="container">
     <h1>Barcode-Scanner</h1>
     <p>Scanne den Barcode mit der Kamera deines Handys:</p>
-
-    <!-- Container für den Live-Stream der Kamera -->
     <div id="scanner-container"></div>
-    <!-- Bereich für das gescannte Ergebnis (optional) -->
     <div id="barcode-result">Gescannten Barcode anzeigen...</div>
-
     <a href="index.html">Zurück zur Hauptseite</a>
   </div>
 
-  <!-- Modal für gescannte Ware -->
-  <div id="scannedModal" class="modal" style="display: none;">
+  <!-- Neues Modal für Bestätigung des Ausbuchens -->
+  <div id="confirmAusbuchenModal" class="modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="confirmModalTitle">
     <div class="modal-content">
-      <h2>Ware gefunden</h2>
-      <div id="modalInfo"></div>
-      <div id="modalActions">
-        <button id="btnAusbuchenScanned">Ausbuchen</button>
-        <button id="btnUmlagernScanned">Umlagern</button>
-        <button id="btnCloseScannedModal">Abbrechen</button>
+      <h2 id="confirmModalTitle">Wollen Sie die Ware ausbuchen?</h2>
+      <div id="confirmModalContent">
+        <!-- Hier werden Details wie Produktname, MHD und Charge eingefügt -->
       </div>
-      <!-- Abschnitt für Umlagerung -->
-      <div id="umlagerungSection" style="display:none;">
-        <label for="newLagerort">Neuer Lagerort:</label>
-        <select id="newLagerort"></select>
-        <button id="btnUmlagernConfirm">Umlagern</button>
-        <button id="btnCancelUmlagerung">Abbrechen</button>
+      <div class="modal-actions">
+        <button id="btnConfirmAusbuchen">Ja, ausbuchen</button>
+        <button id="btnCancelAusbuchen">Abbrechen</button>
       </div>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

@@ -9,7 +9,6 @@
 <body>
   <div class="container">
     <h1>Lagerbestand</h1>
-
     <nav>
       <ul>
         <li><a href="index.html">Startseite</a></li>
@@ -17,20 +16,17 @@
         <li><a href="lagerbestand.html">Lagerbestand anzeigen</a></li>
       </ul>
     </nav>
-
-    <!-- Lagerbestand-Sektion -->
+    
+    <!-- Lagerbestand-Tabelle -->
     <section id="lagerbestand">
       <h2>Lagerbestand</h2>
-
       <!-- Suchfeld -->
       <label for="search">Suchen:</label>
       <input type="text" id="search" placeholder="Produktname oder Lagerort" />
-
       <div class="button-container">
         <button id="btnZeigeLagerbestand">Lagerbestand anzeigen</button>
         <button id="btnAllePositionenLoeschen">Alle Positionen löschen</button>
       </div>
-
       <table>
         <thead>
           <tr>
@@ -45,6 +41,18 @@
         </tbody>
       </table>
     </section>
+    
+    <!-- Produkt-Detail Modal (für die Lagerbestandseite) -->
+    <div id="productModal" class="modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+      <div class="modal-content">
+        <span class="close" id="btnCloseProductModal">&times;</span>
+        <h2 id="productModalTitle">Produkt Details</h2>
+        <div id="productDetailContent">
+          <!-- Hier werden die Produktinformationen dynamisch eingefügt -->
+        </div>
+        <button id="btnPrintBarcode">Barcode Drucken</button>
+      </div>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
