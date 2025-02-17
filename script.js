@@ -366,7 +366,10 @@ function initScanner() {
     Quagga.onDetected(function(result) {
       if (result && result.codeResult && result.codeResult.code) {
         let scannedCode = result.codeResult.code;
-        document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
+        const resultElem = document.getElementById("barcode-result");
+        if (resultElem) {
+          resultElem.innerText = `Gescannt: ${scannedCode}`;
+        }
         handleScannedBarcode(scannedCode);
       } else {
         console.log("Kein gültiger Barcode erkannt.");
@@ -375,12 +378,12 @@ function initScanner() {
   }
 }
 
-// Eventlistener an DOMContentLoaded anhängen
+// Alles in einem DOMContentLoaded-Handler bündeln
 document.addEventListener("DOMContentLoaded", function() {
   ladeLagerorte();
   zeigeLagerbestand();
   
-  // Buttons aus index.html und lagerbestand.html
+  // Eventlistener für Buttons
   const btnEinbuchen = document.getElementById("btnEinbuchen");
   if (btnEinbuchen) btnEinbuchen.addEventListener("click", einbuchen);
   
@@ -407,10 +410,9 @@ document.addEventListener("DOMContentLoaded", function() {
   const btnPrintBarcode = document.getElementById("btnPrintBarcode");
   if (btnPrintBarcode) btnPrintBarcode.addEventListener("click", printBarcode);
   
-  // Buttons in scanner.html
+  // Scanner-spezifische Buttons in scanner.html
   const btnAusbuchenScanned = document.getElementById("btnAusbuchenScanned");
   if (btnAusbuchenScanned) btnAusbuchenScanned.addEventListener("click", () => {
-    // Beispielhafte Logik für gescannte Ware – hier einfach ausbuchen aufrufen
     ausbuchen();
   });
   
@@ -434,7 +436,7 @@ document.addEventListener("DOMContentLoaded", function() {
     document.getElementById("umlagerungSection").style.display = "none";
   });
   
-  // Scanner initialisieren, falls vorhanden
+  // Scanner initialisieren, falls der Container vorhanden ist
   if (document.querySelector("#scanner-container")) {
     initScanner();
   }
