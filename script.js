@@ -219,7 +219,7 @@ function zeigeGefiltertenLagerbestand(filtered) {
       <td>${produkt.mhd}</td>
       <td>${produkt.lagerort}</td>
     `;
-    row.addEventListener("click", () => openProductModal(index));
+    row.addEventListener("click", () => openProductModal(lagerbestand.indexOf(produkt)));
     tabelle.appendChild(row);
   });
 }
