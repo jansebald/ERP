@@ -314,12 +314,24 @@ function initScanner() {
         name: "Live",
         type: "LiveStream",
         target: document.querySelector("#scanner-container"),
-        constraints: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+        constraints: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
       },
-      decoder: { readers: ["code_128_reader"], multiple: false },
+      decoder: {
+        readers: ["code_128_reader"],
+        patchSize: "medium", // probiere auch "small" oder "large"
+        multiple: false
+      },
       locate: true
     }, function(err) {
-      if (err) { console.error("Quagga init error:", err); notify("Scanner-Fehler: " + err); return; }
+      if (err) {
+        console.error("Quagga init error:", err);
+        notify("Scanner-Fehler: " + err);
+        return;
+      }
       console.log("Quagga initialisiert.");
       Quagga.start();
     });
