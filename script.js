@@ -173,27 +173,59 @@ function zeigeGefiltertenLagerbestand(filtered) {
 
 // Einbuchen und Ausbuchen
 function einbuchen() {
-  const produktname = (document.getElementById("produktname") || {}).value.trim();
-  const menge = parseInt((document.getElementById("menge") || {}).value);
-  const mhd = (document.getElementById("mhd") || {}).value;
-  const lagerort = (document.getElementById("lagerortEinbuchen") || {}).value;
-  
+  const produktname = document.getElementById("produktname").value.trim();
+  const menge = parseInt(document.getElementById("menge").value);
+  const mhd = document.getElementById("mhd").value;
+  const lagerort = document.getElementById("lagerortEinbuchen").value;
+
+  // Prüfen, ob Eingaben okay sind ...
   if (!produktname || !menge || !mhd || !lagerort) {
     notify("Bitte alle Felder ausfüllen!");
     return;
   }
   if (menge <= 0) {
-    notify("Menge muss > 0 sein!");
+    notify("Die Menge muss größer als 0 sein.");
     return;
   }
-  
-  const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-  let neuerEintrag = { produktname, menge, mhd, lagerort, barcode: uniqueId, eingebuchtAm: new Date().toLocaleString() };
-  
+
+  // Hier holen wir uns die letzte Charge aus dem localStorage
+  // Wenn noch nichts da ist, starten wir bei 0
+  let lastCharge = parseInt(localStorage.getItem("lastCharge") || "0", 10);
+
+  // Hochzählen, damit wir die nächste Charge bekommen
+  lastCharge++;
+  if (lastCharge > 9999) {
+    notify("Alle 9999 Kurz-Chargen sind verbraucht!"); 
+    // Hier kannst du auch wieder bei 1 anfangen oder was anderes machen
+    lastCharge = 1; 
+  }
+
+  // Im localStorage speichern
+  localStorage.setItem("lastCharge", lastCharge.toString());
+
+  // Chargennummer mit führenden Nullen formatieren
+  const chargeNummer = String(lastCharge).padStart(4, "0");
+
+  // Hier baust du deinen Barcode zusammen
+  const uniqueId = "WARE-" + chargeNummer; 
+  // => z.B. "WARE-0001", "WARE-0002", ...
+
+  // Jetzt dein Objekt
+  const neuerEintrag = {
+    produktname,
+    menge,
+    mhd,
+    lagerort,
+    barcode: uniqueId,
+    eingebuchtAm: new Date().toLocaleString()
+  };
+
+  // Ab in den Lagerbestand
   lagerbestand.push(neuerEintrag);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-  
-  notify(`${menge} von ${produktname} eingebucht.`);
+
+  // Feedback & Refresh
+  notify(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
   clearInputs();
   zeigeLagerbestand();
 }
