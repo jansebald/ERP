@@ -15,8 +15,12 @@ function levenshtein(a, b) {
   if (m === 0) return n;
   if (n === 0) return m;
   const matrix = [];
-  for (let i = 0; i <= m; i++) { matrix[i] = [i]; }
-  for (let j = 0; j <= n; j++) { matrix[0][j] = j; }
+  for (let i = 0; i <= m; i++) { 
+    matrix[i] = [i]; 
+  }
+  for (let j = 0; j <= n; j++) { 
+    matrix[0][j] = j; 
+  }
   for (let i = 1; i <= m; i++) {
     for (let j = 1; j <= n; j++) {
       matrix[i][j] = a.charAt(i - 1) === b.charAt(j - 1)
@@ -58,7 +62,7 @@ function handleScannedBarcode(scannedCode) {
   if (bestDistance <= threshold && bestMatch) {
     currentScannedItem = bestMatch;
     const index = lagerbestand.indexOf(bestMatch);
-    // Statt des bisherigen Produkt-Detail-Modals öffnen wir jetzt unser Bestätigungs-Modal:
+    // Öffne das Bestätigungs-Modal zum Ausbuchen:
     openConfirmAusbuchenModal(index);
   } else {
     notify("Ware nicht gefunden! (Bereinigt: " + cleanedScanned + ")");
@@ -79,7 +83,7 @@ function openConfirmAusbuchenModal(index) {
   modal.style.display = "block";
 }
 
-// Funktion, um ausgebuchte Ware zu verarbeiten (hier wird standardmäßig 1 Einheit ausgebucht)
+// Funktion, um ausgebuchte Ware zu verarbeiten (hier wird die komplette Charge ausgebucht)
 function confirmAusbuchenScanned() {
   if (currentScannedItem) {
     const index = lagerbestand.indexOf(currentScannedItem);
@@ -96,12 +100,10 @@ function confirmAusbuchenScanned() {
 
 // DOMContentLoaded – Eventlistener hinzufügen
 document.addEventListener("DOMContentLoaded", () => {
-  // ... (weitere Initialisierungen)
-  
   // Scanner initialisieren, falls Container vorhanden ist
   initScanner();
 
-  // Eventlistener für das Ausbuchen-Modal (auf scanner.html)
+  // Eventlistener für das Ausbuchen-Modal (scanner.html)
   const btnConfirm = document.getElementById("btnConfirmAusbuchen");
   if (btnConfirm) {
     btnConfirm.addEventListener("click", confirmAusbuchenScanned);
@@ -153,7 +155,9 @@ function ladeLagerorte() {
 function clearInputs() {
   ["produktname", "menge", "mhd", "ausbuchenProdukt", "ausbuchenMenge", "lagerortEinbuchen", "lagerortAusbuchen"].forEach(id => {
     let elem = document.getElementById(id);
-    if (elem) { elem.value = ""; }
+    if (elem) { 
+      elem.value = ""; 
+    }
   });
 }
 
@@ -182,7 +186,9 @@ function zeigeLagerbestand() {
 }
 
 const btnCloseProductModal = document.getElementById("btnCloseProductModal");
-if (btnCloseProductModal) btnCloseProductModal.addEventListener("click", closeProductModal);
+if (btnCloseProductModal) {
+  btnCloseProductModal.addEventListener("click", closeProductModal);
+}
 
 function allePositionenLoeschen() {
   if (confirm("Alle Positionen wirklich löschen?")) {
@@ -210,7 +216,7 @@ function zeigeGefiltertenLagerbestand(filtered) {
     tabelle.innerHTML = "<tr><td colspan='4'>Keine Produkte gefunden.</td></tr>";
     return;
   }
-  filtered.forEach((produkt, index) => {
+  filtered.forEach((produkt) => {
     let row = document.createElement("tr");
     row.style.cursor = "pointer";
     row.innerHTML = `
@@ -231,7 +237,6 @@ function einbuchen() {
   const mhd = document.getElementById("mhd").value;
   const lagerort = document.getElementById("lagerortEinbuchen").value;
 
-  // Prüfen, ob Eingaben okay sind ...
   if (!produktname || !menge || !mhd || !lagerort) {
     notify("Bitte alle Felder ausfüllen!");
     return;
@@ -241,29 +246,16 @@ function einbuchen() {
     return;
   }
 
-  // Hier holen wir uns die letzte Charge aus dem localStorage
-  // Wenn noch nichts da ist, starten wir bei 0
   let lastCharge = parseInt(localStorage.getItem("lastCharge") || "0", 10);
-
-  // Hochzählen, damit wir die nächste Charge bekommen
   lastCharge++;
   if (lastCharge > 9999) {
-    notify("Alle 9999 Kurz-Chargen sind verbraucht!"); 
-    // Hier kannst du auch wieder bei 1 anfangen oder was anderes machen
-    lastCharge = 1; 
+    notify("Alle 9999 Kurz-Chargen sind verbraucht!");
+    lastCharge = 1;
   }
-
-  // Im localStorage speichern
   localStorage.setItem("lastCharge", lastCharge.toString());
-
-  // Chargennummer mit führenden Nullen formatieren
   const chargeNummer = String(lastCharge).padStart(4, "0");
+  const uniqueId = "WARE-" + chargeNummer;
 
-  // Hier baust du deinen Barcode zusammen
-  const uniqueId = "WARE-" + chargeNummer; 
-  // => z.B. "WARE-0001", "WARE-0002", ...
-
-  // Jetzt dein Objekt
   const neuerEintrag = {
     produktname,
     menge,
@@ -273,11 +265,9 @@ function einbuchen() {
     eingebuchtAm: new Date().toLocaleString()
   };
 
-  // Ab in den Lagerbestand
   lagerbestand.push(neuerEintrag);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
 
-  // Feedback & Refresh
   notify(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
   clearInputs();
   zeigeLagerbestand();
@@ -305,7 +295,9 @@ function ausbuchen() {
     let produkt = lagerbestand[index];
     if (produkt.menge >= menge) {
       produkt.menge -= menge;
-      if (produkt.menge === 0) { lagerbestand.splice(index, 1); }
+      if (produkt.menge === 0) { 
+        lagerbestand.splice(index, 1); 
+      }
       localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
       notify(`${menge} von ${produktname} ausgebucht.`);
     } else {
@@ -338,13 +330,20 @@ function openProductModal(index) {
     </div>
   `;
   let barcodeWidth = window.innerWidth < 400 ? 0.8 : window.innerWidth < 600 ? 1 : 2;
-  JsBarcode("#modalBarcodeSvg", produkt.barcode, { format: "CODE128", width: barcodeWidth, height: 50, displayValue: false });
+  JsBarcode("#modalBarcodeSvg", produkt.barcode, { 
+    format: "CODE128", 
+    width: barcodeWidth, 
+    height: 50, 
+    displayValue: false 
+  });
   modal.style.display = "block";
 }
 
 function closeProductModal() {
   let modal = document.getElementById("productModal");
-  if (modal) { modal.style.display = "none"; }
+  if (modal) { 
+    modal.style.display = "none"; 
+  }
 }
 
 function printBarcode() {
@@ -376,7 +375,11 @@ function printBarcode() {
       </html>
     `);
   printWindow.document.close();
-  setTimeout(() => { printWindow.focus(); printWindow.print(); printWindow.close(); }, 500);
+  setTimeout(() => { 
+    printWindow.focus(); 
+    printWindow.print(); 
+    printWindow.close(); 
+  }, 500);
 }
 
 // Snackbar-Benachrichtigung
@@ -385,7 +388,9 @@ function notify(message) {
   if (snackbar) {
     snackbar.textContent = message;
     snackbar.className = "show";
-    setTimeout(() => { snackbar.className = snackbar.className.replace("show", ""); }, 3000);
+    setTimeout(() => { 
+      snackbar.className = snackbar.className.replace("show", ""); 
+    }, 3000);
   } else {
     alert(message);
   }
@@ -407,7 +412,7 @@ function initScanner() {
       },
       decoder: {
         readers: ["code_128_reader"],
-        patchSize: "medium", // probiere auch "small" oder "large"
+        patchSize: "medium",
         multiple: false
       },
       locate: true
@@ -424,7 +429,9 @@ function initScanner() {
       if (result && result.codeResult && result.codeResult.code) {
         let scannedCode = result.codeResult.code;
         let resultElem = document.getElementById("barcode-result");
-        if (resultElem) { resultElem.innerText = `Gescannt: ${scannedCode}`; }
+        if (resultElem) { 
+          resultElem.innerText = `Gescannt: ${scannedCode}`; 
+        }
         handleScannedBarcode(scannedCode);
       }
     });
@@ -439,32 +446,47 @@ document.addEventListener("DOMContentLoaded", () => {
   
   // Index-spezifische Buttons
   let btnEinbuchen = document.getElementById("btnEinbuchen");
-  if (btnEinbuchen) { btnEinbuchen.addEventListener("click", einbuchen); }
+  if (btnEinbuchen) { 
+    btnEinbuchen.addEventListener("click", einbuchen); 
+  }
   
   let btnAusbuchen = document.getElementById("btnAusbuchen");
-  if (btnAusbuchen) { btnAusbuchen.addEventListener("click", ausbuchen); }
+  if (btnAusbuchen) { 
+    btnAusbuchen.addEventListener("click", ausbuchen); 
+  }
   
   let btnZeigeLagerbestand = document.getElementById("btnZeigeLagerbestand");
-  if (btnZeigeLagerbestand) { btnZeigeLagerbestand.addEventListener("click", zeigeLagerbestand); }
+  if (btnZeigeLagerbestand) { 
+    btnZeigeLagerbestand.addEventListener("click", zeigeLagerbestand); 
+  }
   
   let btnAllePositionenLoeschen = document.getElementById("btnAllePositionenLoeschen");
-  if (btnAllePositionenLoeschen) { btnAllePositionenLoeschen.addEventListener("click", allePositionenLoeschen); }
+  if (btnAllePositionenLoeschen) { 
+    btnAllePositionenLoeschen.addEventListener("click", allePositionenLoeschen); 
+  }
   
   let searchInput = document.getElementById("search");
-  if (searchInput) { searchInput.addEventListener("keyup", sucheLagerbestand); }
+  if (searchInput) { 
+    searchInput.addEventListener("keyup", sucheLagerbestand); 
+  }
   
   let btnCloseEtikett = document.getElementById("btnCloseEtikett");
-  if (btnCloseEtikett) { btnCloseEtikett.addEventListener("click", () => { 
+  if (btnCloseEtikett) { 
+    btnCloseEtikett.addEventListener("click", () => { 
       let etikett = document.getElementById("etikettContainer");
       if (etikett) etikett.style.display = "none";
-    }); 
+    });
   }
   
   let btnCloseProductModal = document.getElementById("btnCloseProductModal");
-  if (btnCloseProductModal) { btnCloseProductModal.addEventListener("click", closeProductModal); }
+  if (btnCloseProductModal) { 
+    btnCloseProductModal.addEventListener("click", closeProductModal);
+  }
   
   let btnPrintBarcode = document.getElementById("btnPrintBarcode");
-  if (btnPrintBarcode) { btnPrintBarcode.addEventListener("click", printBarcode); }
+  if (btnPrintBarcode) { 
+    btnPrintBarcode.addEventListener("click", printBarcode);
+  }
   
   // Scanner-spezifische Initialisierung
   initScanner();
