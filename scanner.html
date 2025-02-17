@@ -70,57 +70,20 @@
       <h2>Ware gefunden</h2>
       <div id="modalInfo"></div>
       <div id="modalActions">
-        <button onclick="ausbuchenScannedItem()">Ausbuchen</button>
-        <button onclick="showUmlagerungOptions()">Umlagern</button>
-        <button onclick="closeModal()">Abbrechen</button>
+        <button id="btnAusbuchenScanned">Ausbuchen</button>
+        <button id="btnUmlagernScanned">Umlagern</button>
+        <button id="btnCloseScannedModal">Abbrechen</button>
       </div>
       <!-- Abschnitt für Umlagerung -->
       <div id="umlagerungSection" style="display:none;">
         <label for="newLagerort">Neuer Lagerort:</label>
         <select id="newLagerort"></select>
-        <button onclick="umlagernScannedItem()">Umlagern</button>
-        <button onclick="cancelUmlagerung()">Abbrechen</button>
+        <button id="btnUmlagernConfirm">Umlagern</button>
+        <button id="btnCancelUmlagerung">Abbrechen</button>
       </div>
     </div>
   </div>
 
-  <script>
-    // QuaggaJS initialisieren und starten
-    function startScanner() {
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#scanner-container"),
-          constraints: {
-            facingMode: "environment"
-          }
-        },
-        decoder: {
-          // Verwende den Code 128 Reader, um dein Barcode-Format zu erkennen
-          readers: ["code_128_reader"]
-        }
-      }, function(err) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        Quagga.start();
-      });
-  
-      // Barcode-Erkennung
-      Quagga.onDetected(function(result) {
-        const barcode = result.codeResult.code;
-        document.getElementById("barcode-result").innerText = `Gescannt: ${barcode}`;
-        // Verhindere Mehrfachauslösungen, wenn bereits ein Modal offen ist
-        if (document.getElementById("scannedModal").style.display === "none") {
-          handleScannedBarcode(barcode);
-        }
-      });
-    }
-  
-    startScanner();
-  </script>
   <script src="script.js"></script>
 </body>
 </html>

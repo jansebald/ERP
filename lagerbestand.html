@@ -24,11 +24,11 @@
 
       <!-- Suchfeld -->
       <label for="search">Suchen:</label>
-      <input type="text" id="search" placeholder="Produktname oder Lagerort" onkeyup="sucheLagerbestand()" />
+      <input type="text" id="search" placeholder="Produktname oder Lagerort" />
 
       <div class="button-container">
-        <button onclick="zeigeLagerbestand()">Lagerbestand anzeigen</button>
-        <button onclick="allePositionenLoeschen()">Alle Positionen löschen</button>
+        <button id="btnZeigeLagerbestand">Lagerbestand anzeigen</button>
+        <button id="btnAllePositionenLoeschen">Alle Positionen löschen</button>
       </div>
 
       <table>
@@ -46,7 +46,6 @@
       </table>
     </section>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>

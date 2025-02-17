@@ -37,7 +37,7 @@
         <!-- Optionen werden durch JavaScript hinzugefügt -->
       </select>
 
-      <button onclick="einbuchen()">Einbuchen</button>
+      <button id="btnEinbuchen">Einbuchen</button>
     </section>
 
     <!-- Ausbuchen-Sektion -->
@@ -54,7 +54,7 @@
         <!-- Optionen werden durch JavaScript hinzugefügt -->
       </select>
 
-      <button onclick="ausbuchen()">Ausbuchen</button>
+      <button id="btnAusbuchen">Ausbuchen</button>
     </section>
 
     <!-- Lagerbestand-Sektion -->
@@ -63,11 +63,11 @@
 
       <!-- Suchfeld -->
       <label for="search">Suchen:</label>
-      <input type="text" id="search" placeholder="Produktname oder Lagerort" onkeyup="sucheLagerbestand()" />
+      <input type="text" id="search" placeholder="Produktname oder Lagerort" />
 
       <div class="button-container">
-        <button onclick="zeigeLagerbestand()">Lagerbestand anzeigen</button>
-        <button onclick="allePositionenLoeschen()">Alle Positionen löschen</button>
+        <button id="btnZeigeLagerbestand">Lagerbestand anzeigen</button>
+        <button id="btnAllePositionenLoeschen">Alle Positionen löschen</button>
       </div>
 
       <table>
@@ -90,21 +90,24 @@
       <h2>Barcode Etikett</h2>
       <svg id="barcodeSvg"></svg>
       <p id="barcodeValue"></p>
-      <button onclick="closeEtikett()">Schließen</button>
+      <button id="btnCloseEtikett">Schließen</button>
     </div>
 
-<!-- Produkt-Detail Modal -->
-<div id="productModal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span class="close" onclick="closeProductModal()">&times;</span>
-      <h2>Produkt Details</h2>
-      <div id="productDetailContent">
-        <!-- Hier werden die Produktinformationen dynamisch eingefügt -->
+    <!-- Produkt-Detail Modal -->
+    <div id="productModal" class="modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
+      <div class="modal-content">
+        <span class="close" id="btnCloseProductModal">&times;</span>
+        <h2 id="productModalTitle">Produkt Details</h2>
+        <div id="productDetailContent">
+          <!-- Hier werden die Produktinformationen dynamisch eingefügt -->
+        </div>
+        <button id="btnPrintBarcode">Barcode Drucken</button>
       </div>
-      <button onclick="printBarcode()">Barcode Drucken</button>
     </div>
   </div>
-  </div>
+
+  <!-- Optionaler Snackbar für Benachrichtigungen -->
+  <div id="snackbar"></div>
 
   <script src="script.js"></script>
 </body>

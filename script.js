@@ -6,131 +6,111 @@ const lagerorte = ["Wareneingang", "Chargierung", "Mischerei", "Füllerei", "Ver
 // Globaler Lagerbestand – wird aus dem localStorage geladen oder als leeres Array initialisiert
 let lagerbestand = JSON.parse(localStorage.getItem("lagerbestand")) || [];
 
-// Global für den aktuell gescannten Artikel (wird z. B. im Barcode-Scanner genutzt)
+// Global für den aktuell gescannten Artikel
 let currentScannedItem = null;
 
-/* --------------- Funktionen für Dropdowns und Lagerbestand --------------- */
-// Levenshtein-Funktion zur Berechnung der Ähnlichkeit
+// Hilfsfunktionen
 function levenshtein(a, b) {
-    const m = a.length;
-    const n = b.length;
-    if (m === 0) return n;
-    if (n === 0) return m;
-    
-    const matrix = [];
-    
-    for (let i = 0; i <= m; i++) {
-      matrix[i] = [i];
-    }
-    for (let j = 0; j <= n; j++) {
-      matrix[0][j] = j;
-    }
-    
-    for (let i = 1; i <= m; i++) {
-      for (let j = 1; j <= n; j++) {
-        if (a.charAt(i - 1) === b.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1
-          );
-        }
+  const m = a.length, n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const matrix = [];
+  for (let i = 0; i <= m; i++) { matrix[i] = [i]; }
+  for (let j = 0; j <= n; j++) { matrix[0][j] = j; }
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      if (a.charAt(i - 1) === b.charAt(j - 1)) {
+        matrix[i][j] = matrix[i - 1][j - 1];
+      } else {
+        matrix[i][j] = Math.min(
+          matrix[i - 1][j - 1] + 1,
+          matrix[i][j - 1] + 1,
+          matrix[i - 1][j] + 1
+        );
       }
     }
-    return matrix[m][n];
   }
-  
-  // Funktion, die den Barcode bereinigt: Entfernt alle Zeichen außer A-Z, 0-9 und Bindestrich, und wandelt in Großbuchstaben um.
-  function cleanCode(code) {
-    return code.replace(/[^A-Z0-9-]/gi, "").toUpperCase();
-  }
-  
-  // Angepasste handleScannedBarcode-Funktion
-  function handleScannedBarcode(scannedCode) {
-    // Ursprünglichen gescannten Code bereinigen
-    const cleanedScanned = cleanCode(scannedCode);
-    console.log("Original gescannt:", scannedCode);
-    console.log("Bereinigt gescannt:", cleanedScanned);
-  
-    // Prüfe, ob der bereinigte Code mit "WARE-" beginnt (wie in deinem Format vorgesehen)
-    if (!cleanedScanned.startsWith("WARE-")) {
-      alert("Ungültiger Barcode erkannt: " + cleanedScanned + "\nBitte verbessere die Scanbedingungen (Beleuchtung, Druckqualität etc.).");
-      return;
-    }
-    
-    // Fuzzy Matching: Vergleiche den bereinigten gescannten Barcode mit den gespeicherten Barcodes
-    let bestMatch = null;
-    let bestDistance = Infinity;
-    lagerbestand.forEach(item => {
-      const cleanedStored = cleanCode(item.barcode);
-      const distance = levenshtein(cleanedScanned, cleanedStored);
-      console.log(`Vergleiche ${cleanedScanned} mit ${cleanedStored} -> Abstand: ${distance}`);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestMatch = item;
-      }
-    });
-    
-    // Schwellenwert festlegen (z.B. 2) – passe diesen Wert ggf. an
-    const threshold = 2;
-    if (bestDistance <= threshold && bestMatch) {
-      currentScannedItem = bestMatch;
-      openProductModal(lagerbestand.indexOf(bestMatch));
-    } else {
-      alert("Ware nicht gefunden! (Bereinigt gescannt: " + cleanedScanned + ")");
-    }
-  }
-// Lagerorte in die Dropdown-Menüs laden
-function ladeLagerorte() {
-    console.log("ladeLagerorte wird ausgeführt");
-    const einbuchenDropdown = document.getElementById("lagerortEinbuchen");
-    const ausbuchenDropdown = document.getElementById("lagerortAusbuchen");
-  
-    if (einbuchenDropdown) {
-      einbuchenDropdown.innerHTML = "";
-      const defaultOption = document.createElement("option");
-      defaultOption.textContent = "Bitte wählen...";
-      defaultOption.value = "";
-      einbuchenDropdown.appendChild(defaultOption);
-  
-      lagerorte.forEach(lagerort => {
-        const option = document.createElement("option");
-        option.value = lagerort;
-        option.textContent = lagerort;
-        einbuchenDropdown.appendChild(option);
-      });
-    }
-  
-    if (ausbuchenDropdown) {
-      ausbuchenDropdown.innerHTML = "";
-      const defaultOption = document.createElement("option");
-      defaultOption.textContent = "Bitte wählen...";
-      defaultOption.value = "";
-      ausbuchenDropdown.appendChild(defaultOption);
-  
-      lagerorte.forEach(lagerort => {
-        const option = document.createElement("option");
-        option.value = lagerort;
-        option.textContent = lagerort;
-        ausbuchenDropdown.appendChild(option);
-      });
-    }
+  return matrix[m][n];
 }
+
+function cleanCode(code) {
+  return code.replace(/[^A-Z0-9-]/gi, "").toUpperCase();
+}
+
+// Konsolidierte handleScannedBarcode-Funktion
+function handleScannedBarcode(scannedCode) {
+  const cleanedScanned = cleanCode(scannedCode);
+  console.log("Original gescannt:", scannedCode);
+  console.log("Bereinigt gescannt:", cleanedScanned);
   
-// Eingabefelder leeren
+  if (!cleanedScanned.startsWith("WARE-")) {
+    notify("Ungültiger Barcode erkannt: " + cleanedScanned + "\nBitte verbessere die Scanbedingungen (Beleuchtung, Druckqualität etc.).");
+    return;
+  }
+  
+  let bestMatch = null;
+  let bestDistance = Infinity;
+  lagerbestand.forEach(item => {
+    const cleanedStored = cleanCode(item.barcode);
+    const distance = levenshtein(cleanedScanned, cleanedStored);
+    console.log(`Vergleiche ${cleanedScanned} mit ${cleanedStored} -> Abstand: ${distance}`);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestMatch = item;
+    }
+  });
+  
+  const threshold = 2;
+  if (bestDistance <= threshold && bestMatch) {
+    currentScannedItem = bestMatch;
+    const index = lagerbestand.indexOf(bestMatch);
+    openProductModal(index);
+  } else {
+    notify("Ware nicht gefunden! (Bereinigt gescannt: " + cleanedScanned + ")");
+  }
+}
+
+// Dropdowns und Lagerbestand anzeigen
+function ladeLagerorte() {
+  console.log("ladeLagerorte wird ausgeführt");
+  const einbuchenDropdown = document.getElementById("lagerortEinbuchen");
+  const ausbuchenDropdown = document.getElementById("lagerortAusbuchen");
+  if (einbuchenDropdown) {
+    einbuchenDropdown.innerHTML = "";
+    const defaultOption = document.createElement("option");
+    defaultOption.textContent = "Bitte wählen...";
+    defaultOption.value = "";
+    einbuchenDropdown.appendChild(defaultOption);
+    lagerorte.forEach(lagerort => {
+      const option = document.createElement("option");
+      option.value = lagerort;
+      option.textContent = lagerort;
+      einbuchenDropdown.appendChild(option);
+    });
+  }
+  if (ausbuchenDropdown) {
+    ausbuchenDropdown.innerHTML = "";
+    const defaultOption = document.createElement("option");
+    defaultOption.textContent = "Bitte wählen...";
+    defaultOption.value = "";
+    ausbuchenDropdown.appendChild(defaultOption);
+    lagerorte.forEach(lagerort => {
+      const option = document.createElement("option");
+      option.value = lagerort;
+      option.textContent = lagerort;
+      ausbuchenDropdown.appendChild(option);
+    });
+  }
+}
+
 function clearInputs() {
   const ids = ["produktname", "menge", "mhd", "ausbuchenProdukt", "ausbuchenMenge", "lagerortEinbuchen", "lagerortAusbuchen"];
   ids.forEach(id => {
     const elem = document.getElementById(id);
-    if (elem) {
-      elem.value = "";
-    }
+    if (elem) { elem.value = ""; }
   });
 }
-  
-// Lagerbestand anzeigen – jede Zeile ist klickbar und öffnet das Detail-Modal
+
 function zeigeLagerbestand() {
   const tabelle = document.getElementById("lagerbestandTabelle");
   if (!tabelle) return;
@@ -151,60 +131,52 @@ function zeigeLagerbestand() {
       <td>${produkt.mhd}</td>
       <td>${produkt.lagerort}</td>
     `;
-    // Eventlistener für Klick und Touch hinzufügen:
-    row.addEventListener("click", function() {
-      openProductModal(index);
-    });
-    row.addEventListener("touchend", function() {
-      openProductModal(index);
-    });
+    row.addEventListener("click", () => openProductModal(index));
+    row.addEventListener("touchend", () => openProductModal(index));
     tabelle.appendChild(row);
   });
 }
-  
-// Alle Positionen löschen
+
 function allePositionenLoeschen() {
   if (confirm("Möchten Sie wirklich alle Positionen im Lagerbestand löschen?")) {
     lagerbestand = [];
     localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
     zeigeLagerbestand();
-    alert("Der Lagerbestand wurde erfolgreich geleert.");
+    notify("Der Lagerbestand wurde erfolgreich geleert.");
   }
 }
-  
-// Suche im Lagerbestand
+
 function sucheLagerbestand() {
   const searchQuery = document.getElementById("search").value.toLowerCase();
-  const filteredLagerbestand = lagerbestand.filter(produkt =>
+  const filtered = lagerbestand.filter(produkt =>
     produkt.produktname.toLowerCase().includes(searchQuery) ||
     produkt.lagerort.toLowerCase().includes(searchQuery)
   );
-  zeigeGefiltertenLagerbestand(filteredLagerbestand);
+  zeigeGefiltertenLagerbestand(filtered);
 }
-  
-function zeigeGefiltertenLagerbestand(filteredLagerbestand) {
+
+function zeigeGefiltertenLagerbestand(filtered) {
   const tabelle = document.getElementById("lagerbestandTabelle");
   tabelle.innerHTML = "";
-  
-  if (filteredLagerbestand.length === 0) {
+  if (filtered.length === 0) {
     tabelle.innerHTML = "<tr><td colspan='4'>Keine Produkte gefunden.</td></tr>";
     return;
   }
-  
-  filteredLagerbestand.forEach((produkt, index) => {
-    const row = `<tr onclick="openProductModal(${index})" style="cursor: pointer;">
+  filtered.forEach((produkt, index) => {
+    const row = document.createElement("tr");
+    row.style.cursor = "pointer";
+    row.innerHTML = `
       <td>${produkt.produktname}</td>
       <td>${produkt.menge}</td>
       <td>${produkt.mhd}</td>
       <td>${produkt.lagerort}</td>
-    </tr>`;
-    tabelle.innerHTML += row;
+    `;
+    row.addEventListener("click", () => openProductModal(index));
+    tabelle.appendChild(row);
   });
 }
-  
-/* --------------- Funktionen für Ein- und Ausbuchen --------------- */
-  
-// Einbuchen eines Produkts inklusive Barcode-Generierung und Erfassung des Buchungszeitpunkts
+
+// Einbuchen und Ausbuchen
 function einbuchen() {
   const produktname = document.getElementById("produktname").value.trim();
   const menge = parseInt(document.getElementById("menge").value);
@@ -212,18 +184,15 @@ function einbuchen() {
   const lagerort = document.getElementById("lagerortEinbuchen").value;
   
   if (!produktname || !menge || !mhd || !lagerort) {
-    alert("Bitte alle Felder ausfüllen!");
+    notify("Bitte alle Felder ausfüllen!");
     return;
   }
   if (menge <= 0) {
-    alert("Die Menge muss größer als 0 sein.");
+    notify("Die Menge muss größer als 0 sein.");
     return;
   }
   
-  // Generiere einen eindeutigen Barcode (z. B. "WARE-<timestamp>-<zufallszahl>")
   const uniqueId = "WARE-" + Date.now() + "-" + Math.floor(Math.random() * 1000);
-  
-  // Neuer Datensatz inkl. Erfassung des Buchungszeitpunkts
   const neuerEintrag = {
     produktname,
     menge,
@@ -236,24 +205,22 @@ function einbuchen() {
   lagerbestand.push(neuerEintrag);
   localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
   
-  alert(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
-  
+  notify(`${menge} von ${produktname} erfolgreich in Lagerort ${lagerort} eingebucht!`);
   clearInputs();
   zeigeLagerbestand();
 }
-  
-// Ausbuchen über das klassische Formular
+
 function ausbuchen() {
   const produktname = document.getElementById("ausbuchenProdukt").value.trim();
   const menge = parseInt(document.getElementById("ausbuchenMenge").value);
   const lagerort = document.getElementById("lagerortAusbuchen").value;
   
   if (!produktname || !menge || !lagerort) {
-    alert("Bitte alle Felder ausfüllen!");
+    notify("Bitte alle Felder ausfüllen!");
     return;
   }
   if (menge <= 0) {
-    alert("Die Menge muss größer als 0 sein.");
+    notify("Die Menge muss größer als 0 sein.");
     return;
   }
   
@@ -265,25 +232,21 @@ function ausbuchen() {
     const produkt = lagerbestand[index];
     if (produkt.menge >= menge) {
       produkt.menge -= menge;
-      if (produkt.menge === 0) {
-        lagerbestand.splice(index, 1);
-      }
+      if (produkt.menge === 0) { lagerbestand.splice(index, 1); }
       localStorage.setItem("lagerbestand", JSON.stringify(lagerbestand));
-      alert(`${menge} von ${produktname} aus Lagerort ${lagerort} erfolgreich ausgebucht.`);
+      notify(`${menge} von ${produktname} aus Lagerort ${lagerort} erfolgreich ausgebucht.`);
     } else {
-      alert("Nicht genügend Bestand verfügbar!");
+      notify("Nicht genügend Bestand verfügbar!");
     }
   } else {
-    alert("Produkt oder Lagerort nicht gefunden!");
+    notify("Produkt oder Lagerort nicht gefunden!");
   }
   
   clearInputs();
   zeigeLagerbestand();
 }
-  
-/* --------------- Funktionen für das Produkt-Detail Modal --------------- */
-  
-// Öffnet das Modal und füllt es mit den Details des angeklickten Produkts (inklusive Barcode)
+
+// Produkt-Detail Modal
 function openProductModal(index) {
   const produkt = lagerbestand[index];
   const modal = document.getElementById("productModal");
@@ -301,15 +264,7 @@ function openProductModal(index) {
     </div>
   `;
   
-  let barcodeWidth;
-  if (window.innerWidth < 400) {
-    barcodeWidth = 0.8;
-  } else if (window.innerWidth < 600) {
-    barcodeWidth = 1;
-  } else {
-    barcodeWidth = 2;
-  }
-  
+  let barcodeWidth = window.innerWidth < 400 ? 0.8 : (window.innerWidth < 600 ? 1 : 2);
   JsBarcode("#modalBarcodeSvg", produkt.barcode, {
     format: "CODE128",
     width: barcodeWidth,
@@ -319,60 +274,39 @@ function openProductModal(index) {
   
   modal.style.display = "block";
 }
-  
-// Schließt das Produkt-Detail Modal
+
 function closeProductModal() {
   document.getElementById("productModal").style.display = "none";
 }
-  
-// Öffnet ein neues Fenster mit dem Barcode, um diesen zu drucken
+
 function printBarcode() {
-    // Barcode-Wert aus dem Modal holen
-    const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
-    if (!barcodeValue) {
-      alert("Kein Barcode verfügbar!");
-      return;
-    }
-    
-    // Neues Fenster für den Druck öffnen – hier wird eine feste Fenstergröße definiert
-    const printWindow = window.open('', '_blank', 'width=800,height=600,resizable=yes');
-    
-    // HTML-Struktur für das Druckfenster schreiben:
-    printWindow.document.write(`
+  const barcodeValue = document.getElementById("modalBarcodeValue").textContent.trim();
+  if (!barcodeValue) {
+    notify("Kein Barcode verfügbar!");
+    return;
+  }
+  
+  const printWindow = window.open('', '_blank', 'width=800,height=600,resizable=yes');
+  printWindow.document.write(`
       <!DOCTYPE html>
       <html lang="de">
       <head>
         <meta charset="UTF-8">
-        <!-- Meta viewport mit fester Breite, um Skalierung zu vermeiden -->
         <meta name="viewport" content="width=800, initial-scale=1.0">
         <title>Barcode Drucken</title>
         <style>
-          body {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            background: #fff;
-          }
-          /* Feste Größe für das Barcode-SVG */
-          #barcode {
-            width: 600px;
-            height: 150px;
-          }
+          body { margin: 0; padding: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #fff; }
+          #barcode { width: 600px; height: 150px; }
         </style>
-        <!-- JsBarcode einbinden -->
         <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
       </head>
       <body>
         <svg id="barcode"></svg>
         <script>
-          // Barcode in fester Größe generieren:
           JsBarcode("#barcode", "${barcodeValue}", {
             format: "CODE128",
-            width: 4,      // Balkenbreite (fest)
-            height: 100,   // Höhe
+            width: 4,
+            height: 100,
             displayValue: true,
             margin: 10
           });
@@ -380,117 +314,128 @@ function printBarcode() {
       </body>
       </html>
     `);
-    
-    printWindow.document.close();
-    
-    // Kurze Verzögerung, damit der Barcode vollständig gerendert wird, bevor der Druckdialog aufgerufen wird
-    setTimeout(() => {
-      printWindow.focus();
-      printWindow.print();
-      printWindow.close();
-    }, 500);
+  printWindow.document.close();
+  setTimeout(() => {
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
+  }, 500);
+}
+
+// Snackbar-Benachrichtigung
+function notify(message) {
+  const snackbar = document.getElementById("snackbar");
+  if (snackbar) {
+    snackbar.textContent = message;
+    snackbar.className = "show";
+    setTimeout(() => { snackbar.className = snackbar.className.replace("show", ""); }, 3000);
+  } else {
+    alert(message);
   }
-  
-/* --------------- Funktionen für den Barcode-Scanner (Modal) --------------- */
-  
-// Diese Funktion wird nur einmal definiert und bereinigt den gescannten Code
-function handleScannedBarcode(scannedCode) {
-    // Bereinige den gescannten Code: trimme Leerzeichen, entferne Zeilenumbrüche und konvertiere in Großbuchstaben
-    scannedCode = scannedCode.trim().toUpperCase().replace(/[\n\r]+/g, "");
-    console.log("Gescannt:", scannedCode);
-    console.log("Gespeicherte Barcodes:", lagerbestand.map(p => p.barcode).join(", "));
-  
-    let bestMatch = null;
-    let bestDistance = Infinity;
-    // Vergleiche den gescannten Code mit jedem gespeicherten Barcode
-    lagerbestand.forEach(item => {
-      const storedCode = item.barcode.trim().toUpperCase();
-      const distance = levenshtein(scannedCode, storedCode);
-      console.log(`Vergleiche ${scannedCode} mit ${storedCode} -> Abstand: ${distance}`);
-      if (distance < bestDistance) {
-        bestDistance = distance;
-        bestMatch = item;
+}
+
+// Quagga Barcode-Scanner Initialisierung
+function initScanner() {
+  if (typeof Quagga !== "undefined") {
+    Quagga.init({
+      inputStream: {
+        name: "Live",
+        type: "LiveStream",
+        target: document.querySelector("#scanner-container"),
+        constraints: {
+          facingMode: "environment",
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        }
+      },
+      decoder: {
+        readers: ["code_128_reader"],
+        multiple: false
+      },
+      locate: true
+    }, function(err) {
+      if (err) {
+        console.error("Quagga init error:", err);
+        notify("Fehler beim Initialisieren des Scanners: " + err);
+        return;
       }
+      console.log("Quagga wurde erfolgreich initialisiert.");
+      Quagga.start();
     });
   
-    // Schwellenwert festlegen (z. B. 2; du kannst diesen Wert nach Bedarf anpassen)
-    const threshold = 2;
-    if (bestDistance <= threshold && bestMatch) {
-      currentScannedItem = bestMatch;
-      // Finde den Index des besten Matches im Array, um das Modal zu öffnen
-      const index = lagerbestand.indexOf(bestMatch);
-      openProductModal(index);
-    } else {
-      alert("Ware nicht gefunden! (Scanned: " + scannedCode + ")");
-    }
-  }
-  
-/* --------------- Quagga Barcode-Scanner Initialisierung --------------- */
-  
-if (typeof Quagga !== "undefined") {
-    // Wir packen die Initialisierung in window.onload, um sicherzustellen, dass alle DOM-Elemente geladen sind
-    window.onload = function() {
-      // Lade zuerst die Dropdowns und den lokalen Lagerbestand
-      ladeLagerorte();
-      zeigeLagerbestand();
-  
-      // Quagga initialisieren
-      Quagga.init({
-        inputStream: {
-          name: "Live",
-          type: "LiveStream",
-          target: document.querySelector("#scanner-container"),
-          constraints: {
-            facingMode: "environment",
-            // Falls möglich, kannst du auch hier eine minimale Auflösung definieren:
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
-          }
-        },
-        decoder: {
-          readers: ["code_128_reader"],
-          multiple: false,
-          // Du könntest auch experimentell den "patchSize" Parameter ändern:
-          // patchSize: "medium" // Alternativen: "small", "large"
-        },
-        locate: true
-      }, function(err) {
-        if (err) {
-          console.error("Quagga init error:", err);
-          alert("Fehler beim Initialisieren des Scanners: " + err);
-          return;
-        }
-        console.log("Quagga wurde erfolgreich initialisiert.");
-        Quagga.start();
-      });
-
-      function cleanScannedCode(code) {
-        // Erlaubte Zeichen: A-Z, 0-9 und Bindestrich
-        return code.replace(/[^A-Z0-9-]/g, "");
+    Quagga.onDetected(function(result) {
+      if (result && result.codeResult && result.codeResult.code) {
+        let scannedCode = result.codeResult.code;
+        document.getElementById("barcode-result").innerText = `Gescannt: ${scannedCode}`;
+        handleScannedBarcode(scannedCode);
+      } else {
+        console.log("Kein gültiger Barcode erkannt.");
       }
-  
-      // Registrierung des Detektions-Callbacks
-      Quagga.onDetected(function(result) {
-        console.log("Quagga onDetected result:", result);
-        if (result && result.codeResult && result.codeResult.code) {
-          let scannedCode = result.codeResult.code.trim();
-          console.log("Gescannt:", scannedCode);
-          // Setze das Ergebnis in ein Display-Element (falls vorhanden)
-          const resultElem = document.getElementById("barcode-result");
-          if (resultElem) {
-            resultElem.innerText = `Gescannt: ${scannedCode}`;
-          }
-          // Zur Debug-Zwecken rufen wir handleScannedBarcode direkt auf
-          handleScannedBarcode(scannedCode);
-        } else {
-          console.log("Kein gültiger Barcode erkannt.");
-        }
-      });
-    };
+    });
   }
-  
-/* --------------- Initialisierung beim Laden der Seite --------------- */
-window.onload = function() {
+}
+
+// Eventlistener an DOMContentLoaded anhängen
+document.addEventListener("DOMContentLoaded", function() {
   ladeLagerorte();
   zeigeLagerbestand();
-};
+  
+  // Buttons aus index.html und lagerbestand.html
+  const btnEinbuchen = document.getElementById("btnEinbuchen");
+  if (btnEinbuchen) btnEinbuchen.addEventListener("click", einbuchen);
+  
+  const btnAusbuchen = document.getElementById("btnAusbuchen");
+  if (btnAusbuchen) btnAusbuchen.addEventListener("click", ausbuchen);
+  
+  const btnZeigeLagerbestand = document.getElementById("btnZeigeLagerbestand");
+  if (btnZeigeLagerbestand) btnZeigeLagerbestand.addEventListener("click", zeigeLagerbestand);
+  
+  const btnAllePositionenLoeschen = document.getElementById("btnAllePositionenLoeschen");
+  if (btnAllePositionenLoeschen) btnAllePositionenLoeschen.addEventListener("click", allePositionenLoeschen);
+  
+  const searchInput = document.getElementById("search");
+  if (searchInput) searchInput.addEventListener("keyup", sucheLagerbestand);
+  
+  const btnCloseEtikett = document.getElementById("btnCloseEtikett");
+  if (btnCloseEtikett) btnCloseEtikett.addEventListener("click", () => {
+    document.getElementById("etikettContainer").style.display = "none";
+  });
+  
+  const btnCloseProductModal = document.getElementById("btnCloseProductModal");
+  if (btnCloseProductModal) btnCloseProductModal.addEventListener("click", closeProductModal);
+  
+  const btnPrintBarcode = document.getElementById("btnPrintBarcode");
+  if (btnPrintBarcode) btnPrintBarcode.addEventListener("click", printBarcode);
+  
+  // Buttons in scanner.html
+  const btnAusbuchenScanned = document.getElementById("btnAusbuchenScanned");
+  if (btnAusbuchenScanned) btnAusbuchenScanned.addEventListener("click", () => {
+    // Beispielhafte Logik für gescannte Ware – hier einfach ausbuchen aufrufen
+    ausbuchen();
+  });
+  
+  const btnUmlagernScanned = document.getElementById("btnUmlagernScanned");
+  if (btnUmlagernScanned) btnUmlagernScanned.addEventListener("click", () => {
+    document.getElementById("umlagerungSection").style.display = "block";
+  });
+  
+  const btnCloseScannedModal = document.getElementById("btnCloseScannedModal");
+  if (btnCloseScannedModal) btnCloseScannedModal.addEventListener("click", () => {
+    document.getElementById("scannedModal").style.display = "none";
+  });
+  
+  const btnUmlagernConfirm = document.getElementById("btnUmlagernConfirm");
+  if (btnUmlagernConfirm) btnUmlagernConfirm.addEventListener("click", () => {
+    notify("Umlagerung durchgeführt (Platzhalter).");
+  });
+  
+  const btnCancelUmlagerung = document.getElementById("btnCancelUmlagerung");
+  if (btnCancelUmlagerung) btnCancelUmlagerung.addEventListener("click", () => {
+    document.getElementById("umlagerungSection").style.display = "none";
+  });
+  
+  // Scanner initialisieren, falls vorhanden
+  if (document.querySelector("#scanner-container")) {
+    initScanner();
+  }
+});
