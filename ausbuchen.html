@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Software - Ausbuchen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Ausbuchen</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Startseite</a></li>
+        <li><a href="einbuchen.html">Einbuchen</a></li>
+        <li><a href="lagerbestand.html">Lagerbestand</a></li>
+        <li><a href="scanner.html">Barcode-Scanner</a></li>
+      </ul>
+    </nav>
+    <section id="ausbuchen">
+      <h2>Ausbuchen</h2>
+      <label for="ausbuchenProdukt">Produktname:</label>
+      <input type="text" id="ausbuchenProdukt" placeholder="Produktname">
+      
+      <label for="ausbuchenMenge">Menge (in Kg):</label>
+      <input type="number" id="ausbuchenMenge" placeholder="Bitte in Kg angeben">      
+      <label for="lagerortAusbuchen">Lagerort:</label>
+      <select id="lagerortAusbuchen">
+        <!-- Optionen werden durch script.js hinzugefügt -->
+      </select>
+      
+      <button id="btnAusbuchen">Ausbuchen</button>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

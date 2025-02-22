@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ERP Software - Lagerbestand</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- JsBarcode muss hier geladen werden, damit es in script.js verfügbar ist -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 </head>
 <body>
@@ -14,21 +13,37 @@
     <nav>
       <ul>
         <li><a href="index.html">Startseite</a></li>
+        <li><a href="einbuchen.html">Einbuchen</a></li>
+        <li><a href="ausbuchen.html">Ausbuchen</a></li>
         <li><a href="scanner.html">Barcode-Scanner</a></li>
-        <li><a href="lagerbestand.html">Lagerbestand anzeigen</a></li>
       </ul>
     </nav>
+    
+    <!-- Erweiterte Suche & Filter -->
+    <section id="advancedFilters">
+      <h2>Erweiterte Suche & Filter</h2>
+      <label for="search">Produktsuche:</label>
+      <input type="text" id="search" placeholder="Produktname oder Lagerort" />
+      
+      <label for="filterLagerort">Lagerort:</label>
+      <select id="filterLagerort">
+        <option value="">Alle</option>
+        <!-- Optionen werden dynamisch hinzugefügt -->
+      </select>
+      
+      <label for="filterMinMenge">Mindestmenge:</label>
+      <input type="number" id="filterMinMenge" placeholder="Mindestmenge" />
+      
+      <label for="filterMHD">MHD vor (YYYY-MM-DD):</label>
+      <input type="date" id="filterMHD" />
+      
+      <button id="btnApplyFilters">Filter anwenden</button>
+    </section>
     
     <!-- Lagerbestand-Tabelle -->
     <section id="lagerbestand">
       <h2>Lagerbestand</h2>
-      <!-- Suchfeld -->
-      <label for="search">Suchen:</label>
-      <input type="text" id="search" placeholder="Produktname oder Lagerort" />
       <div class="button-container">
-        <button id="btnZeigeLagerbestand">Lagerbestand anzeigen</button>
-        <button id="btnAllePositionenLoeschen">Alle Positionen löschen</button>
-      </div>
       <table>
         <thead>
           <tr>
@@ -36,6 +51,7 @@
             <th>Menge</th>
             <th>MHD</th>
             <th>Lagerort</th>
+            <th>Status</th>
           </tr>
         </thead>
         <tbody id="lagerbestandTabelle">
@@ -47,10 +63,8 @@
     <!-- Produkt-Detail Modal (für die Lagerbestandseite) -->
     <div id="productModal" class="modal" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="productModalTitle">
       <div class="modal-content">
-        <span class="close" id="btnCloseProductModal">&times;</span>
-        <h2 id="productModalTitle">Produkt Details</h2>
-        <div id="productDetailContent">
-          <!-- Hier werden die Produktinformationen dynamisch eingefügt -->
+        <span class="close" id="btnCloseProductModal" style="cursor:pointer;">&times;</span>        <div id="productDetailContent">
+          <!-- Dynamische Inhalte -->
         </div>
         <button id="btnPrintBarcode">Barcode Drucken</button>
       </div>

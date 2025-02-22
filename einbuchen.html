@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ERP Software - Einbuchen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Einbuchen</h1>
+    <nav>
+      <ul>
+        <li><a href="index.html">Startseite</a></li>
+        <li><a href="ausbuchen.html">Ausbuchen</a></li>
+        <li><a href="lagerbestand.html">Lagerbestand</a></li>
+        <li><a href="scanner.html">Barcode-Scanner</a></li>
+      </ul>
+    </nav>
+    <section id="einbuchen">
+      <h2>Einbuchen</h2>
+      <label for="produktname">Produktname:</label>
+      <input type="text" id="produktname" placeholder="Produktname">
+      
+      <label for="menge">Menge (in Kg):</label>
+      <input type="number" id="menge" placeholder="Bitte in Kg angeben">      
+      <label for="mhd">MHD (YYYY-MM-DD):</label>
+      <input type="date" id="mhd">
+      
+      <label for="lagerortEinbuchen">Lagerort:</label>
+      <select id="lagerortEinbuchen">
+        <!-- Optionen werden durch script.js hinzugefügt -->
+      </select>
+      
+      <button id="btnEinbuchen">Einbuchen</button>
+    </section>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>

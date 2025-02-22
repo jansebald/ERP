@@ -1,15 +1,23 @@
-/* Allgemeine Einstellungen */
+/* SAP-inspiriertes Farbschema */
+:root {
+  --primary-color: #0072C6;    /* Das klassische SAP-Blau */
+  --accent-color:  #005a9e;     /* Etwas dunklerer Ton für Hover-Effekte */
+  --secondary-color: #ffffff;  /* Reines Weiß */
+  --background-color: #f4f4f9;   /* Heller Hintergrund */
+  --text-color: #333;          /* Dunkler Text */
+}
+
+/* Reset und Basiseinstellungen */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: "Helvetica Neue", Arial, sans-serif;
 }
 
-/* Hintergrund und Farbgestaltung */
 body {
-  background-color: #f4f4f9;
-  color: #333;
+  background-color: var(--background-color);
+  color: var(--text-color);
   padding: 20px;
 }
 
@@ -18,42 +26,45 @@ body {
   width: 90%;
   max-width: 1200px;
   margin: 0 auto;
-  background-color: #fff;
+  background-color: var(--secondary-color);
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   padding: 30px;
 }
 
-/* Überschrift */
-h1 {
+/* Überschriften */
+h1, h2 {
   text-align: center;
-  color: #4CAF50;
+  color: var(--primary-color);
   margin-bottom: 20px;
-}
-
-/* Abschnittsüberschriften */
-h2 {
-  color: #333;
-  font-size: 1.5em;
-  margin-bottom: 15px;
 }
 
 /* Navigation */
 nav ul {
   list-style: none;
   display: flex;
-  justify-content: center;
-  gap: 15px;
+  justify-content: flex-start;
+  gap: 20px;
   margin-bottom: 20px;
+  border-bottom: 2px solid var(--primary-color);
+  padding-bottom: 10px;
 }
 
 nav ul li a {
   text-decoration: none;
-  color: #4CAF50;
+  color: var(--primary-color);
   font-weight: bold;
+  padding: 8px 12px;
+  transition: background-color 0.3s, color 0.3s;
 }
 
-/* Formularfelder */
+nav ul li a:hover {
+  background-color: var(--accent-color);
+  color: var(--secondary-color);
+  border-radius: 4px;
+}
+
+/* Formularelemente */
 label {
   display: block;
   margin: 10px 0 5px;
@@ -75,8 +86,8 @@ select {
 
 /* Buttons */
 button {
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
   border: none;
   padding: 12px 20px;
   font-size: 1.1em;
@@ -87,28 +98,10 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--accent-color);
 }
 
-/* Abschnitte */
-section {
-  margin-bottom: 30px;
-}
-
-/* Dropdowns (select-Elemente) */
-select {
-  background-color: #f9f9f9;
-}
-
-/* Button-Container im Lagerbestand */
-.button-container {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 20px;
-}
-
-/* Lagerbestand-Tabelle */
+/* Tabellen */
 table {
   width: 100%;
   border-collapse: collapse;
@@ -123,8 +116,8 @@ table td {
 }
 
 table th {
-  background-color: #4CAF50;
-  color: white;
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 /* Suchfeld */
@@ -136,23 +129,6 @@ table th {
   border-radius: 4px;
   font-size: 1em;
   background-color: #f9f9f9;
-}
-
-/* Media queries */
-@media (max-width: 600px) {
-  .container {
-      width: 95%;
-      padding: 10px;
-  }
-
-  nav ul {
-      flex-direction: column;
-      align-items: center;
-  }
-
-  table, th, td {
-      font-size: 0.9em;
-  }
 }
 
 /* Barcode SVG Styling */
@@ -183,7 +159,7 @@ table th {
   visibility: hidden;
   min-width: 250px;
   background-color: #333;
-  color: #fff;
+  color: var(--secondary-color);
   text-align: center;
   border-radius: 4px;
   padding: 16px;
@@ -201,11 +177,58 @@ table th {
 }
 
 @keyframes fadein {
-  from {bottom: 0; opacity: 0;}
-  to {bottom: 30px; opacity: 1;}
+  from { bottom: 0; opacity: 0; }
+  to { bottom: 30px; opacity: 1; }
 }
 
 @keyframes fadeout {
-  from {bottom: 30px; opacity: 1;}
-  to {bottom: 0; opacity: 0;}
+  from { bottom: 30px; opacity: 1; }
+  to { bottom: 0; opacity: 0; }
+}
+
+/* Mobile Optimierungen */
+@media (max-width: 600px) {
+  .container {
+    width: 95%;
+    padding: 10px;
+  }
+  
+  nav ul {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  table, th, td {
+    font-size: 0.9em;
+  }
+}
+.back-button {
+  position: relative;  /* oder absolute, falls du ihn woanders platzieren willst */
+  z-index: 9999;       /* höher als der Video-Stream */
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
+  padding: 10px 15px;
+  border-radius: 5px;
+  text-decoration: none;
+  margin-top: 20px;
+  display: inline-block;
+}
+#scanner-container {
+  position: relative;
+  width: 100%;
+  max-width: 600px; /* damit's nicht riesig wird */
+  height: 400px;    /* feste Höhe, damit das Layout stabil bleibt */
+  margin: 20px auto;
+  border: 2px solid #ccc;
+  overflow: hidden; /* Video ragt nicht über Container hinaus */
+}
+/* Falls Quagga ein Video-Tag einfügt, dieses responsiv halten */
+#scanner-container video {
+  width: 100%;
+  height: auto;
+  object-fit: cover; /* passt das Video in den Container */
+}
+#btnCloseProductModal {
+  cursor: pointer;
+  z-index: 1001;
 }

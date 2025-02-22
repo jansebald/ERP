@@ -1,63 +1,35 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ERP Software - Startseite</title>
-  <link rel="stylesheet" href="style.css" />
-  <!-- JsBarcode einbinden -->
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
     <h1>ERP Software</h1>
     <nav>
       <ul>
-        <li><a href="index.html">Startseite</a></li>
+        <li><a href="einbuchen.html">Einbuchen</a></li>
+        <li><a href="ausbuchen.html">Ausbuchen</a></li>
+        <li><a href="lagerbestand.html">Lagerbestand</a></li>
         <li><a href="scanner.html">Barcode-Scanner</a></li>
-        <li><a href="lagerbestand.html">Lagerbestand anzeigen</a></li>
       </ul>
     </nav>
-
-    <!-- Einbuchen-Sektion -->
-    <section id="einbuchen">
-      <h2>Einbuchen</h2>
-      <label for="produktname">Produktname:</label>
-      <input type="text" id="produktname" placeholder="Produktname" />
-
-      <label for="menge">Menge:</label>
-      <input type="number" id="menge" placeholder="Menge" />
-
-      <label for="mhd">MHD (YYYY-MM-DD):</label>
-      <input type="date" id="mhd" />
-
-      <label for="lagerortEinbuchen">Lagerort:</label>
-      <select id="lagerortEinbuchen">
-        <!-- Optionen werden durch JavaScript hinzugefügt -->
-      </select>
-
-      <button id="btnEinbuchen">Einbuchen</button>
+    
+    <!-- Dashboard Übersicht -->
+    <section id="dashboard">
+      <h2>Dashboard Übersicht</h2>
+      <div id="dashboardMetrics">
+        <p>Gesamtprodukte: <span id="totalProducts">0</span></p>
+        <p>Produkte bald ablaufend: <span id="expiringProducts">0</span></p>
+        <p>Gesamtmenge: <span id="totalQuantity">0</span></p>
+      </div>
     </section>
-
-    <!-- Ausbuchen-Sektion -->
-    <section id="ausbuchen">
-      <h2>Ausbuchen</h2>
-      <label for="ausbuchenProdukt">Produktname:</label>
-      <input type="text" id="ausbuchenProdukt" placeholder="Produktname" />
-
-      <label for="ausbuchenMenge">Menge:</label>
-      <input type="number" id="ausbuchenMenge" placeholder="Menge" />
-
-      <label for="lagerortAusbuchen">Lagerort:</label>
-      <select id="lagerortAusbuchen">
-        <!-- Optionen werden durch JavaScript hinzugefügt -->
-      </select>
-
-      <button id="btnAusbuchen">Ausbuchen</button>
-    </section>
+    
+    <p>Willkommen in deinem ERP-Dashboard – alle Funktionen auf einen Blick!</p>
   </div>
-  <!-- Optionaler Snackbar für Benachrichtigungen -->
-  <div id="snackbar"></div>
   <script src="script.js"></script>
 </body>
 </html>
