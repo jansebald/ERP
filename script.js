@@ -626,6 +626,18 @@ document.addEventListener("DOMContentLoaded", () => {
     btnPrintBarcode.addEventListener("click", printBarcode);
   }
 
+  // *** Eventlistener für Ausbuchen-Modal in scanner.html ***
+  let btnConfirmAusbuchen = document.getElementById("btnConfirmAusbuchen");
+  if (btnConfirmAusbuchen) {
+    btnConfirmAusbuchen.addEventListener("click", confirmAusbuchenScanned);
+  }
+  let btnCancelAusbuchen = document.getElementById("btnCancelAusbuchen");
+  if (btnCancelAusbuchen) {
+    btnCancelAusbuchen.addEventListener("click", () => {
+      document.getElementById("confirmAusbuchenModal").style.display = "none";
+    });
+  }
+
   // Scanner-spezifische Initialisierung
   initScanner();
 });
