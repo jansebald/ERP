@@ -92,9 +92,10 @@ function confirmAusbuchenScanned() {
       notify(`${produkt.produktname} (Charge ${produkt.barcode}) wurde vollständig ausgebucht.`);
     }
   }
+  // Reset currentScannedItem und Modal schließen
+  currentScannedItem = null;
   document.getElementById("confirmAusbuchenModal").style.display = "none";
 }
-
 // ------------------ Neue Funktionen für Ablaufwarnung, Dashboard und Filter ------------------
 
 // Prüft, ob das MHD innerhalb von 7 Tagen erreicht wird
@@ -634,10 +635,10 @@ document.addEventListener("DOMContentLoaded", () => {
   let btnCancelAusbuchen = document.getElementById("btnCancelAusbuchen");
   if (btnCancelAusbuchen) {
     btnCancelAusbuchen.addEventListener("click", () => {
+      currentScannedItem = null;
       document.getElementById("confirmAusbuchenModal").style.display = "none";
     });
   }
-
   // Scanner-spezifische Initialisierung
   initScanner();
 });
