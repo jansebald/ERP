@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ERP Software - Startseite</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 </head>
 <body>
   <div class="container">
@@ -19,17 +20,27 @@
     </nav>
     
     <!-- Dashboard Übersicht -->
-    <section id="dashboard">
-      <h2>Dashboard Übersicht</h2>
-      <div id="dashboardMetrics">
-        <p>Gesamtprodukte: <span id="totalProducts">0</span></p>
-        <p>Produkte bald ablaufend: <span id="expiringProducts">0</span></p>
-        <p>Gesamtmenge: <span id="totalQuantity">0</span></p>
-      </div>
-    </section>
-    
-    <p>Willkommen in deinem ERP-Dashboard – alle Funktionen auf einen Blick!</p>
+<section id="dashboard">
+  <h2>Dashboard Übersicht</h2>
+  <div class="dashboard-cards">
+    <div class="card">
+      <i class="fas fa-box-open fa-2x"></i>
+      <h3>Gesamtprodukte</h3>
+      <p id="totalProducts">0</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-hourglass-half fa-2x"></i>
+      <h3>Ablaufende Produkte</h3>
+      <p id="expiringProducts">0</p>
+    </div>
+    <div class="card">
+      <i class="fas fa-balance-scale fa-2x"></i>
+      <h3>Gesamtmenge</h3>
+      <p id="totalQuantity">0 Kg</p>
+    </div>
   </div>
-  <script src="script.js"></script>
+  <p>Willkommen in deinem ERP-Dashboard – alle Funktionen auf einen Blick!</p>
+</section>
+      <script src="script.js"></script>
 </body>
 </html>

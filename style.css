@@ -16,9 +16,7 @@
 }
 
 body {
-  background-color: var(--background-color);
-  color: var(--text-color);
-  padding: 20px;
+  background: linear-gradient(135deg, #f4f4f9, #e0e0e9);
 }
 
 /* Container für das Layout */
@@ -231,4 +229,25 @@ table th {
 #btnCloseProductModal {
   cursor: pointer;
   z-index: 1001;
+}
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.card {
+  background-color: var(--secondary-color);
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  text-align: center;
+  transition: transform 0.3s;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.card h3 {
+  margin-bottom: 10px;
+  color: var(--primary-color);
 }
